@@ -97,6 +97,7 @@
             "Webkul\\SocialShare\\": "packages/Webkul/SocialShare/src",
             "Webkul\\Tax\\": "packages/Webkul/Tax/src",
             "Webkul\\Theme\\": "packages/Webkul/Theme/src",
+            "Webkul\\EcoVasosTheme\\": "packages/Webkul/EcoVasosTheme/src",
             "Webkul\\User\\": "packages/Webkul/User/src"
         }
     },
