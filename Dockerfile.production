@@ -1,0 +1,81 @@
+FROM php:8.2-fpm
+
+# System dependencies
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    libicu-dev \
+    libxml2-dev \
+    libgmp-dev \
+    git \
+    curl \
+    zip \
+    unzip \
+    supervisor \
+    nginx \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+        pdo_mysql \
+        mysqli \
+        mbstring \
+        exif \
+        pcntl \
+        bcmath \
+        zip \
+        intl \
+        opcache \
+        gd \
+        calendar \
+        gmp
+
+# Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+# Copy config files
+COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
+COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY docker/nginx/default.conf /etc/nginx/http.d/default.conf
+COPY docker/start.sh /usr/local/bin/start
+
+RUN chmod +x /usr/local/bin/start
+
+# Install composer dependencies (cache layer)
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+# Copy full application
+COPY . .
+
+# Dump optimized autoloader
+RUN composer dump-autoload --optimize --no-dev
+
+# Build frontend assets
+RUN npm ci && npm run build
+
+# Create required directories
+RUN mkdir -p \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/framework/cache/data \
+    storage/logs \
+    storage/app/public \
+    bootstrap/cache
+
+EXPOSE 80
+
+CMD ["/usr/local/bin/start"]
