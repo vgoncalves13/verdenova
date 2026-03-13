@@ -98,6 +98,7 @@
             "Webkul\\Tax\\": "packages/Webkul/Tax/src",
             "Webkul\\Theme\\": "packages/Webkul/Theme/src",
             "Webkul\\EcoVasosTheme\\": "packages/Webkul/EcoVasosTheme/src",
+            "Webkul\\MelhorEnvio\\": "packages/Webkul/MelhorEnvio/src",
             "Webkul\\User\\": "packages/Webkul/User/src"
         }
     },

@@ -30,6 +30,7 @@ use Webkul\Sales\Providers\SalesServiceProvider;
 use Webkul\Shipping\Providers\ShippingServiceProvider;
 use Webkul\Shop\Providers\ShopServiceProvider;
 use Webkul\EcoVasosTheme\Providers\EcoVasosThemeServiceProvider;
+use Webkul\MelhorEnvio\Providers\MelhorEnvioServiceProvider;
 use Webkul\Sitemap\Providers\SitemapServiceProvider;
 use Webkul\SocialLogin\Providers\SocialLoginServiceProvider;
 use Webkul\SocialShare\Providers\SocialShareServiceProvider;
@@ -75,6 +76,7 @@ return [
     ShippingServiceProvider::class,
     ShopServiceProvider::class,
     EcoVasosThemeServiceProvider::class,
+    MelhorEnvioServiceProvider::class,
     SitemapServiceProvider::class,
     SocialLoginServiceProvider::class,
     SocialShareServiceProvider::class,

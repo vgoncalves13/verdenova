@@ -151,37 +151,16 @@
 
             {!! view_render_event('bagisto.shop.checkout.onepage.address.form.address.after') !!}
 
+            {{-- País fixo Brasil --}}
+            <x-shop::form.control-group class="hidden">
+                <x-shop::form.control-group.control
+                    type="text"
+                    ::name="controlName + '.country'"
+                    ::value="'BR'"
+                />
+            </x-shop::form.control-group>
+
             <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
-                <!-- Country -->
-                <x-shop::form.control-group class="!mb-4">
-                    <x-shop::form.control-group.label class="{{ core()->isCountryRequired() ? 'required' : '' }} !mt-0">
-                        @lang('shop::app.checkout.onepage.address.country')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="select"
-                        ::name="controlName + '.country'"
-                        ::value="address.country"
-                        v-model="selectedCountry"
-                        rules="{{ core()->isCountryRequired() ? 'required' : '' }}"
-                        :label="trans('shop::app.checkout.onepage.address.country')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.country')"
-                    >
-                        <option value="">
-                            @lang('shop::app.checkout.onepage.address.select-country')
-                        </option>
-
-                        <option
-                            v-for="country in countries"
-                            :value="country.code"
-                        >
-                            @{{ country.name }}
-                        </option>
-                    </x-shop::form.control-group.control>
-
-                    <x-shop::form.control-group.error ::name="controlName + '.country'" />
-                </x-shop::form.control-group>
-
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.country.after') !!}
 
                 <!-- State -->
@@ -326,9 +305,7 @@
 
             data() {
                 return {
-                    selectedCountry: this.address.country,
-
-                    countries: [],
+                    selectedCountry: 'BR',
 
                     states: null,
                 }
@@ -336,25 +313,15 @@
 
             computed: {
                 haveStates() {
-                    return !! this.states[this.selectedCountry]?.length;
+                    return !! this.states?.[this.selectedCountry]?.length;
                 },
             },
 
             mounted() {
-                this.getCountries();
-
                 this.getStates();
             },
 
             methods: {
-                getCountries() {
-                    this.$axios.get("{{ route('shop.api.core.countries') }}")
-                        .then(response => {
-                            this.countries = response.data.data;
-                        })
-                        .catch(() => {});
-                },
-
                 getStates() {
                     this.$axios.get("{{ route('shop.api.core.states') }}")
                         .then(response => {
