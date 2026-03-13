@@ -99,6 +99,7 @@
             "Webkul\\Theme\\": "packages/Webkul/Theme/src",
             "Webkul\\EcoVasosTheme\\": "packages/Webkul/EcoVasosTheme/src",
             "Webkul\\MelhorEnvio\\": "packages/Webkul/MelhorEnvio/src",
+            "Webkul\\MercadoPago\\": "packages/Webkul/MercadoPago/src",
             "Webkul\\User\\": "packages/Webkul/User/src"
         }
     },
