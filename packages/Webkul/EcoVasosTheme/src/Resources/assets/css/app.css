@@ -542,7 +542,7 @@ img.lazy {
     /* Logo branqueada no header verde */
     .vn-mob-logo img {
         filter: brightness(0) invert(1);
-        height: 28px;
+        height: 48px;
         width: auto;
     }
 
