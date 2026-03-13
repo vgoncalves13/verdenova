@@ -1,6 +1,6 @@
 services:
   app:
-    image: ecovasos:latest
+    image: verdenova:latest
     build:
       context: .
       dockerfile: Dockerfile.production

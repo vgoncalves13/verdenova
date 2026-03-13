@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "==> Starting ecovasos-store..."
+echo "==> Starting verdenova..."
 
 # Create log directories
 mkdir -p /var/log/php /var/log/supervisor

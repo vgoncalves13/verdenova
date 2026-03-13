@@ -11,10 +11,10 @@ done
 
 COMPOSE_FILE="docker-compose.production.yml"
 ENV_FILE=".env.production"
-IMAGE_NAME="ecovasos"
+IMAGE_NAME="verdenova"
 NGINX_CONF_SRC="nginx-server.conf"
-NGINX_CONF_DST="/etc/nginx/sites-available/ecovasos"
-NGINX_ENABLED="/etc/nginx/sites-enabled/ecovasos"
+NGINX_CONF_DST="/etc/nginx/sites-available/verdenova"
+NGINX_ENABLED="/etc/nginx/sites-enabled/verdenova"
 
 # ─── Checks ───────────────────────────────────────────────────────────────────
 if [ "$(id -u)" -ne 0 ]; then
@@ -29,7 +29,7 @@ if [ ! -f "$ENV_FILE" ]; then
 fi
 
 echo "============================================================"
-echo "  ecovasos-store deploy"
+echo "  verdenova deploy"
 echo "  Migrations: $RUN_MIGRATIONS"
 echo "============================================================"
 
