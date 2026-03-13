@@ -15,6 +15,9 @@
    Verde Nova · Homepage
    Aesthetic: Botanical Editorial · Luxury Natural
 ══════════════════════════════════════════════════════════════ */
+
+/* Prevent horizontal scroll on mobile */
+html, body { overflow-x: hidden; }
 :root {
     --vn-forest:   #014d24;
     --vn-leaf:     #016630;
@@ -130,6 +133,7 @@
     display: flex;
     align-items: center;
     overflow: hidden;
+    max-width: 100vw;
 }
 .vn-hero::after {
     content: '';
@@ -186,9 +190,12 @@
 }
 @media (max-width: 1024px) {
     .vn-hero__grid { grid-template-columns: 1fr; gap: 48px; padding: 80px 32px 120px; }
-    .vn-hero__visual { display: none; }
+    .vn-hero__visual { display: none !important; overflow: hidden; }
 }
-@media (max-width: 640px) { .vn-hero__grid { padding: 60px 20px 100px; } }
+@media (max-width: 640px) {
+    .vn-hero__grid { padding: 60px 20px 100px; }
+    .vn-hero__subtitle { max-width: 100%; }
+}
 
 .vn-badge {
     display: inline-flex;
