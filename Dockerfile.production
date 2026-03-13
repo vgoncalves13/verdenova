@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     libxml2-dev \
     libgmp-dev \
+    libonig-dev \
     git \
     curl \
     zip \
