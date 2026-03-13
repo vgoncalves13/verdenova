@@ -1,3 +1,9 @@
+@push('styles')
+<style>
+    body, #app, main#main { background-color: rgb(240 253 244); }
+</style>
+@endPush
+
 <!-- SEO Meta Content -->
 @push('meta')
     <meta name="description" content="@lang('shop::app.checkout.cart.index.cart')"/>
@@ -15,11 +21,13 @@
         @lang('shop::app.checkout.cart.index.cart')
     </x-slot>
 
+    <div class="flex min-h-screen flex-col bg-green-50">
+
     {!! view_render_event('bagisto.shop.checkout.cart.header.before') !!}
 
     <!-- Page Header -->
-    <div class="flex flex-wrap">
-        <div class="flex w-full justify-between border border-b border-l-0 border-r-0 border-t-0 px-[60px] py-4 max-lg:px-8 max-md:px-4">
+    <div class="flex flex-wrap bg-darkGreen shadow-md">
+        <div class="flex w-full justify-between px-[60px] py-4 max-lg:px-8 max-md:px-4">
             <div class="flex items-center gap-x-14 max-[1180px]:gap-x-9">
                 {!! view_render_event('bagisto.shop.checkout.cart.logo.before') !!}
 
@@ -88,6 +96,8 @@
 
         {!! view_render_event('bagisto.shop.checkout.cart.cross_sell_carousel.after') !!}
     @endif
+
+    </div><!-- end bg-green-50 wrapper -->
 
     @pushOnce('scripts')
         <script

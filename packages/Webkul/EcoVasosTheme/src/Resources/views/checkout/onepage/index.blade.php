@@ -1,3 +1,10 @@
+@push('styles')
+<style>
+    body, #app, main#main { background-color: rgb(240 253 244); }
+    #checkout-onepage .bg-white { background-color: rgb(240 253 244) !important; }
+</style>
+@endPush
+
 <!-- SEO Meta Content -->
 @push('meta')
     <meta name="description" content="@lang('shop::app.checkout.onepage.index.checkout')"/>
@@ -15,11 +22,13 @@
         @lang('shop::app.checkout.onepage.index.checkout')
     </x-slot>
 
+    <div id="checkout-onepage" class="flex min-h-screen flex-col bg-green-50">
+
     {!! view_render_event('bagisto.shop.checkout.onepage.header.before') !!}
 
     <!-- Page Header -->
-    <div class="flex-wrap">
-        <div class="flex w-full justify-between border border-b border-l-0 border-r-0 border-t-0 px-[60px] py-4 max-lg:px-8 max-sm:px-4">
+    <div class="flex flex-wrap bg-darkGreen shadow-md">
+        <div class="flex w-full justify-between px-[60px] py-4 max-lg:px-8 max-sm:px-4">
             <div class="flex items-center gap-x-14 max-[1180px]:gap-x-9">
                 <a
                     href="{{ route('shop.home.index') }}"
@@ -61,6 +70,8 @@
             <x-shop::shimmer.checkout.onepage />
         </v-checkout>
     </div>
+
+    </div><!-- end bg-green-50 wrapper -->
 
     @pushOnce('scripts')
         <script

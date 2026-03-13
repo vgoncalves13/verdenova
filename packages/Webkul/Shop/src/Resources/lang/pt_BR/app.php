@@ -537,7 +537,7 @@ return [
                 'customer-service' => 'Atendimento ao Cliente',
                 'email' => 'Email',
                 'footer-content' => 'Conteúdo do Rodapé',
-                'footer-text' => '© Direitos autorais 2010 - :current_year, Webkul Software (registrado na Índia). Todos os direitos reservados.',
+                'footer-text' => '© :current_year Verde Nova. Todos os direitos reservados.',
                 'locale' => 'Localização',
                 'newsletter-text' => 'Prepare-se para nossa Newsletter divertida!',
                 'order-return' => 'Pedido e Devoluções',
