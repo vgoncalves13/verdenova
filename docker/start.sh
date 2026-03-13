@@ -10,7 +10,14 @@ mkdir -p /var/log/php /var/log/supervisor
 echo "==> Waiting for MySQL..."
 MAX_TRIES=60
 TRIES=0
-until php artisan db:show --quiet 2>/dev/null; do
+until php -r "
+\$pdo = new PDO(
+    'mysql:host=' . getenv('DB_HOST') . ';port=' . (getenv('DB_PORT') ?: 3306) . ';dbname=' . getenv('DB_DATABASE'),
+    getenv('DB_USERNAME'),
+    getenv('DB_PASSWORD')
+);
+echo 'ok';
+" 2>/dev/null | grep -q ok; do
     TRIES=$((TRIES + 1))
     if [ "$TRIES" -ge "$MAX_TRIES" ]; then
         echo "ERROR: MySQL did not become ready in time."
@@ -37,17 +44,20 @@ if [ "${RUN_MIGRATIONS}" = "true" ]; then
     php artisan migrate --force
 fi
 
-# Cache configuration
-echo "==> Caching config and routes..."
-php artisan config:clear
-php artisan cache:clear
-php artisan config:cache
-php artisan route:cache
+# Cache: clear bootstrap caches directly (avoids booting the full framework
+# before the DB is seeded, which causes Core::getCurrentChannelCode() to throw).
+echo "==> Clearing bootstrap caches..."
+rm -f bootstrap/cache/config.php
+rm -f bootstrap/cache/routes-v7.php
+rm -f bootstrap/cache/packages.php
+rm -f bootstrap/cache/services.php
+find storage/framework/views -name "*.php" -delete 2>/dev/null || true
+find storage/framework/cache/data -mindepth 1 -delete 2>/dev/null || true
 
-# Storage link
+# Storage link (no artisan needed)
 echo "==> Linking storage..."
 rm -f public/storage
-php artisan storage:link
+ln -sfn "$(pwd)/storage/app/public" "$(pwd)/public/storage"
 
 # Fix permissions
 echo "==> Setting permissions..."
