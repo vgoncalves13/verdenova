@@ -62,10 +62,10 @@ class MercadoPagoController extends Controller
             return response()->json(['ok' => false], 200);
         }
 
-        $type   = $request->input('type') ?? $request->input('topic');
+        $type = $request->input('type') ?? $request->input('topic');
         $dataId = $request->input('data.id') ?? $request->input('id');
 
-        if ($type === 'order' && $dataId) {
+        if ($type === 'payment' && $dataId) {
             $this->handleOrderNotification($dataId);
         }
 
@@ -98,7 +98,7 @@ class MercadoPagoController extends Controller
         $ts = $parts['ts'] ?? '';
         $v1 = $parts['v1'] ?? '';
 
-        $dataId  = $request->input('data.id', '');
+        $dataId = $request->input('data.id', '');
         $template = "id:{$dataId};request-id:{$xRequestId};ts:{$ts};";
 
         $calculated = hash_hmac('sha256', $template, $secret);
@@ -115,15 +115,15 @@ class MercadoPagoController extends Controller
     {
         $accessToken = core()->getConfigData('sales.payment_methods.mercadopago.access_token');
 
-        $client   = new Client(['base_uri' => 'https://api.mercadopago.com']);
-        $response = $client->get("/v1/orders/{$mpOrderId}", [
-            'headers'     => ['Authorization' => "Bearer {$accessToken}"],
+        $client = new Client(['base_uri' => 'https://api.mercadopago.com']);
+        $response = $client->get("/v1/payments/{$mpOrderId}", [
+            'headers' => ['Authorization' => "Bearer {$accessToken}"],
             'http_errors' => false,
         ]);
 
         $mpOrder = json_decode((string) $response->getBody(), true);
 
-        if (($mpOrder['status'] ?? '') !== 'processed') {
+        if (($mpOrder['status'] ?? '') !== 'approved') {
             return;
         }
 
