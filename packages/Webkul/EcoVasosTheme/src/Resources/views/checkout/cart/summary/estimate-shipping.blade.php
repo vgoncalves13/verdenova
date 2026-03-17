@@ -21,7 +21,6 @@
 
 @pushOnce('scripts')
     <script type="text/x-template" id="v-estimate-tax-shipping-template">
-        <!-- Destination Location Form -->
         <x-shop::form
             v-slot="{ meta, errors, handleSubmit }"
             as="div"
@@ -30,7 +29,7 @@
                 <p class="mb-4 max-sm:text-sm">
                     @lang('shop::app.checkout.cart.summary.estimate-shipping.info')
                 </p>
-                
+
                 <!-- Country -->
                 <x-shop::form.control-group class="!mb-2.5">
                     <x-shop::form.control-group.label class="{{ core()->isCountryRequired() ? 'required' : '' }}">
@@ -73,6 +72,7 @@
                             <x-shop::form.control-group.control
                                 type="select"
                                 name="state"
+                                v-model="selectedState"
                                 rules="{{ core()->isStateRequired() ? 'required' : '' }}"
                                 :label="trans('shop::app.checkout.cart.summary.estimate-shipping.state')"
                                 :placeholder="trans('shop::app.checkout.cart.summary.estimate-shipping.state')"
@@ -82,7 +82,7 @@
                                 </option>
 
                                 <option
-                                    v-for='(state, index) in states[selectedCountry]'
+                                    v-for="(state, index) in states[selectedCountry]"
                                     :value="state.code"
                                 >
                                     @{{ state.default_name }}
@@ -94,6 +94,7 @@
                             <x-shop::form.control-group.control
                                 type="text"
                                 name="state"
+                                v-model="selectedState"
                                 rules="{{ core()->isStateRequired() ? 'required' : '' }}"
                                 :label="trans('shop::app.checkout.cart.summary.estimate-shipping.state')"
                                 :placeholder="trans('shop::app.checkout.cart.summary.estimate-shipping.state')"
@@ -113,9 +114,10 @@
                     <x-shop::form.control-group.control
                         type="text"
                         name="postcode"
+                        v-model="postcode"
                         rules="{{ core()->isPostCodeRequired() ? 'required' : '' }}|postcode"
                         :label="trans('shop::app.checkout.cart.summary.estimate-shipping.postcode')"
-                        :placeholder="trans('shop::app.checkout.cart.summary.estimate-shipping.postcode')"
+                        placeholder="00000-000"
                     />
 
                     <x-shop::form.control-group.error control-name="postcode" />
@@ -134,67 +136,118 @@
                             v-for="rate in method.rates"
                         >
                             <div class="absolute top-5 ltr:left-4 rtl:right-4">
-                                <x-shop::form.control-group.control
+                                {{-- Native radio with .stop to prevent triggering form @change --}}
+                                <input
                                     type="radio"
-                                    name="shipping_method"
-                                    ::for="rate.method"
-                                    ::id="rate.method"
-                                    ::value="rate.method"
-                                    ::label="rate.method"
+                                    :id="rate.method"
+                                    :value="rate.method"
+                                    v-model="selectedMethod"
+                                    class="cursor-pointer"
+                                    @change.stop
                                 />
                             </div>
 
-                            <label 
-                                class="block cursor-pointer p-4 pl-12"
+                            <label
+                                class="flex cursor-pointer items-center gap-3 p-4 pl-12"
                                 :for="rate.method"
                             >
-                                <p class="text-2xl font-semibold max-md:text-lg">
-                                    @{{ rate.base_formatted_price }}
-                                </p>
-                                
-                                <p class="mt-2.5 text-xs font-medium max-md:mt-0">
-                                    <span class="font-medium">@{{ rate.method_title }}</span> - @{{ rate.method_description }}
-                                </p>
+                                <img
+                                    v-if="parseDescription(rate.method_description).logo"
+                                    :src="parseDescription(rate.method_description).logo"
+                                    :alt="rate.method_title"
+                                    class="h-8 w-8 shrink-0 rounded object-contain"
+                                />
+
+                                <div class="flex-1">
+                                    <p class="text-xl font-semibold max-md:text-lg">
+                                        @{{ rate.base_formatted_price }}
+                                    </p>
+
+                                    <p class="mt-0.5 text-xs text-gray-500">
+                                        <span class="font-medium text-gray-700">@{{ rate.method_title }}</span>
+                                        <template v-if="parseDescription(rate.method_description).days">
+                                            — @{{ parseDescription(rate.method_description).days }}
+                                        </template>
+                                    </p>
+                                </div>
                             </label>
                         </div>
 
                         {!! view_render_event('bagisto.shop.checkout.cart.summary.estimate_shipping.shipping_method.after') !!}
                     </template>
                 </div>
-            </form>                    
+
+                <!-- Loading indicator -->
+                <div v-if="isStoring" class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                    <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="#016630" stroke-width="4"/>
+                        <path class="opacity-75" fill="#016630" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    Calculando frete...
+                </div>
+            </form>
         </x-shop::form>
     </script>
 
     <script type="module">
         app.component('v-estimate-tax-shipping', {
             template: '#v-estimate-tax-shipping-template',
-            
+
             props: ['cart'],
 
             data() {
                 return {
-                    selectedCountry: '',
-
+                    selectedCountry: 'BR',
+                    selectedState: '',
+                    postcode: '',
                     countries: [],
-
                     states: null,
-
                     methods: [],
-
+                    selectedMethod: null,
                     isStoring: false,
-                }
+                    debounceTimer: null,
+                };
             },
 
             computed: {
                 haveStates() {
-                    return !! this.states[this.selectedCountry]?.length;
+                    return !! this.states?.[this.selectedCountry]?.length;
+                },
+            },
+
+            watch: {
+                /**
+                 * Auto-fetch when postcode reaches 8 digits (Brazilian CEP).
+                 */
+                postcode(val) {
+                    const digits = val.replace(/\D/g, '');
+
+                    if (digits.length >= 8 && this.selectedCountry && this.selectedState) {
+                        clearTimeout(this.debounceTimer);
+                        this.debounceTimer = setTimeout(() => this.fetchMethods(), 600);
+                    }
+                },
+
+                /**
+                 * Apply the selected shipping method to the cart whenever it changes.
+                 */
+                selectedMethod(method) {
+                    if (method && this.selectedCountry && this.selectedState && this.postcode) {
+                        this.applyMethod(method);
+                    }
                 },
             },
 
             mounted() {
                 this.getCountries();
-
                 this.getStates();
+
+                // Pre-fill from existing cart shipping address if available
+                const addr = this.cart?.shipping_address;
+
+                if (addr?.country)  this.selectedCountry = addr.country;
+                if (addr?.state)    this.selectedState   = addr.state;
+                if (addr?.postcode) this.postcode        = addr.postcode;
             },
 
             methods: {
@@ -214,26 +267,111 @@
                         .catch(() => {});
                 },
 
+                /**
+                 * Called by the VeeValidate form @change handler (country / state / postcode changes).
+                 */
                 estimateShipping(params, { setErrors }) {
+                    if (!params.country || !params.state || !params.postcode) return;
+
+                    // Keep v-model values in sync
+                    this.selectedCountry = params.country;
+                    this.selectedState   = params.state;
+                    this.postcode        = params.postcode;
+
                     this.isStoring = true;
 
                     Object.keys(params).forEach(key => params[key] == null && delete params[key]);
-                    
+
                     this.$axios.post('{{ route('shop.api.checkout.cart.estimate_shipping') }}', params)
-                        .then((response) => {
+                        .then(response => {
                             this.isStoring = false;
-
-                            this.methods = response.data.data.shipping_methods;
-
+                            this.methods   = response.data.data.shipping_methods;
                             this.$emit('processed', response.data.data.cart);
+                            this.autoSelectCheapest();
                         })
                         .catch(error => {
                             this.isStoring = false;
 
-                            if (error.response.status == 422) {
+                            if (error.response?.status === 422) {
                                 setErrors(error.response.data.errors);
                             }
                         });
+                },
+
+                /**
+                 * Direct fetch (triggered by postcode watcher debounce).
+                 */
+                fetchMethods() {
+                    if (!this.selectedCountry || !this.selectedState || !this.postcode) return;
+
+                    this.isStoring = true;
+
+                    this.$axios.post('{{ route('shop.api.checkout.cart.estimate_shipping') }}', {
+                        country:  this.selectedCountry,
+                        state:    this.selectedState,
+                        postcode: this.postcode,
+                    })
+                        .then(response => {
+                            this.isStoring = false;
+                            this.methods   = response.data.data.shipping_methods;
+                            this.$emit('processed', response.data.data.cart);
+                            this.autoSelectCheapest();
+                        })
+                        .catch(() => {
+                            this.isStoring = false;
+                        });
+                },
+
+                /**
+                 * Save the chosen shipping method to the cart.
+                 */
+                applyMethod(method) {
+                    this.$axios.post('{{ route('shop.api.checkout.cart.estimate_shipping') }}', {
+                        country:         this.selectedCountry,
+                        state:           this.selectedState,
+                        postcode:        this.postcode,
+                        shipping_method: method,
+                    })
+                        .then(response => {
+                            this.$emit('processed', response.data.data.cart);
+                        })
+                        .catch(() => {});
+                },
+
+                /**
+                 * Pick the cheapest available rate and select it.
+                 * The selectedMethod watcher will call applyMethod automatically.
+                 */
+                autoSelectCheapest() {
+                    const cheapest = this.findCheapestRate();
+
+                    if (cheapest && cheapest.method !== this.selectedMethod) {
+                        this.selectedMethod = cheapest.method;
+                    }
+                },
+
+                parseDescription(description) {
+                    if (! description) return {};
+
+                    try {
+                        return JSON.parse(description);
+                    } catch {
+                        return { days: description };
+                    }
+                },
+
+                findCheapestRate() {
+                    let cheapest = null;
+
+                    for (const method of this.methods) {
+                        for (const rate of method.rates) {
+                            if (!cheapest || rate.base_price < cheapest.base_price) {
+                                cheapest = rate;
+                            }
+                        }
+                    }
+
+                    return cheapest;
                 },
             },
         });

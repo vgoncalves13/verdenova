@@ -194,6 +194,10 @@ class CartController extends APIController
             Cart::saveShippingMethod(request()->input('shipping_method'));
         }
 
+        // Collect rates BEFORE collectTotals — which calls refreshCart() internally,
+        // wiping the in-memory shipping_address relation we just set above.
+        $shippingMethods = array_values(Shipping::collectRates()['shippingMethods'] ?? []);
+
         Cart::collectTotals();
 
         $cartResource = (new CartResource(Cart::getCart()))->jsonSerialize();
@@ -201,7 +205,7 @@ class CartController extends APIController
         return new JsonResource([
             'data' => [
                 'cart' => $cartResource,
-                'shipping_methods' => array_values(Shipping::collectRates()['shippingMethods']),
+                'shipping_methods' => $shippingMethods,
             ],
         ]);
     }
