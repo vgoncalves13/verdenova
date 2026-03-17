@@ -6,6 +6,13 @@
                 "artisan",
                 "boost:mcp"
             ]
+        },
+        "mercadopago": {
+            "type": "sse",
+            "url": "https://mcp.mercadopago.com/mcp",
+            "headers": {
+                "Authorization": "Bearer TEST-647157942251786-031712-3409337ec5ecc26c24146697c3021199-3274525736"
+            }
         }
     }
 }
