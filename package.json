@@ -3,7 +3,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build && npm run build --prefix packages/Webkul/EcoVasosTheme"
     },
     "devDependencies": {
         "@playwright/test": "^1.58.1",
