@@ -1,4 +1,4 @@
-<x-shop::layouts.account>
+<x-eco-vasos-theme::layouts.account>
     <!-- Page Title -->
     <x-slot:title>
         @lang('shop::app.customers.account.addresses.index.add-address')
@@ -269,4 +269,4 @@
         @endif
 
     </div>
-</x-shop::layouts.account>
+</x-eco-vasos-theme::layouts.account>

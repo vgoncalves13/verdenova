@@ -12,6 +12,11 @@
 >
     <head>
 
+        @bagistoVite([
+            'src/Resources/assets/css/app.css',
+            'src/Resources/assets/js/app.js'
+        ])
+
         {!! view_render_event('bagisto.shop.layout.head.before') !!}
 
         <title>{{ $title ?? '' }}</title>
@@ -39,8 +44,8 @@
             name="currency"
             content="{{ core()->getCurrentCurrency()->toJson() }}"
         >
-        <meta 
-            name="generator" 
+        <meta
+            name="generator"
             content="Bagisto"
         >
 
@@ -105,21 +110,21 @@
         <!-- Built With Bagisto -->
         <div id="app">
             <!-- Flash Message Blade Component -->
-            <x-shop::flash-group />
+            <x-eco-vasos-theme::flash-group />
 
             <!-- Confirm Modal Blade Component -->
-            <x-shop::modal.confirm />
+            <x-eco-vasos-theme::modal.confirm />
 
             <!-- Page Header Blade Component -->
             @if ($hasHeader)
-                <x-shop::layouts.header />
+                <x-eco-vasos-theme::layouts.header />
             @endif
 
             @if(
                 core()->getConfigData('general.gdpr.settings.enabled')
                 && core()->getConfigData('general.gdpr.cookie.enabled')
             )
-                <x-shop::layouts.cookie />
+                <x-eco-vasos-theme::layouts.cookie />
             @endif
 
             {!! view_render_event('bagisto.shop.layout.content.before') !!}
@@ -136,7 +141,7 @@
 
             <!-- Page Footer Blade Component -->
             @if ($hasFooter)
-                <x-shop::layouts.footer />
+                <x-eco-vasos-theme::layouts.footer />
             @endif
         </div>
 

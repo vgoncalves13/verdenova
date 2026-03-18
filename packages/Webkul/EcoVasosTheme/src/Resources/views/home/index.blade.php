@@ -607,7 +607,7 @@ html, body { overflow-x: hidden; }
     @endif
 @endpush
 
-<x-shop::layouts>
+<x-eco-vasos-theme::layouts>
     <x-slot:title>
         {{ $channel->home_seo['meta_title'] ?? '' }}
     </x-slot>
@@ -1032,4 +1032,4 @@ html, body { overflow-x: hidden; }
     </div>
 
 
-</x-shop::layouts>
+</x-eco-vasos-theme::layouts>
