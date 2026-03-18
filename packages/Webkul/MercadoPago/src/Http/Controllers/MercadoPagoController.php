@@ -50,6 +50,26 @@ class MercadoPagoController extends Controller
     }
 
     /**
+     * Redirect to the Bagisto success page re-flashing the order_id.
+     *
+     * The flash is consumed when the pending page loads, so by the time the JS
+     * polling detects payment and redirects here, it would be gone. This endpoint
+     * reads the order_id from the non-flash pending_payment session and re-flashes it.
+     */
+    public function success()
+    {
+        $data = session('mercadopago.pending_payment');
+
+        if (! empty($data['bagisto_order_id'])) {
+            session()->flash('order_id', $data['bagisto_order_id']);
+        }
+
+        session()->forget('mercadopago.pending_payment');
+
+        return redirect()->route('shop.checkout.onepage.success');
+    }
+
+    /**
      * Handle asynchronous webhook notifications from MercadoPago.
      *
      * MP expects a 200 response within 22 s; it retries on failure.

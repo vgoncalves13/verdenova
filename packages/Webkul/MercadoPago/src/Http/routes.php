@@ -21,6 +21,9 @@ Route::middleware([
         Route::get('/checkout/mercadopago/pending', [MercadoPagoController::class, 'pending'])
             ->name('mercadopago.pending');
 
+        Route::get('/checkout/mercadopago/success', [MercadoPagoController::class, 'success'])
+            ->name('mercadopago.success');
+
         Route::get('/api/mercadopago/status/{mpOrderId}', [MercadoPagoStatusController::class, 'show'])
             ->name('mercadopago.status');
     });

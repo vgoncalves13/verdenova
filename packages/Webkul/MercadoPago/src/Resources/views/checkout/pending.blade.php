@@ -626,7 +626,7 @@
             @if (! empty($data['mp_payment_id']))
             (function poll() {
                 const url = '{{ route('mercadopago.status', $data['mp_payment_id']) }}';
-                const successUrl = '{{ route('shop.checkout.onepage.success') }}';
+                const successUrl = '{{ route('mercadopago.success') }}';
 
                 fetch(url)
                     .then(r => r.json())
