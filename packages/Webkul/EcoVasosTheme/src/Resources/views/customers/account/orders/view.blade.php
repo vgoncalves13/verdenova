@@ -4,6 +4,88 @@
         @lang('shop::app.customers.account.orders.view.page-title', ['order_id' => $order->increment_id])
     </x-slot>
 
+    @push('styles')
+    <style>
+        /* ── Order view wrapper ── */
+        .mx-4.flex-auto { padding-bottom: 3rem; font-family: 'Poppins', sans-serif; }
+
+        /* Page title */
+        .mx-4.flex-auto h2.text-2xl {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.6rem;
+            color: #012b17;
+            font-weight: 400;
+        }
+
+        /* Action buttons (reorder / cancel) */
+        .mx-4.flex-auto .secondary-button {
+            border-color: #e5e7eb;
+            border-radius: 8px;
+            font-size: .82rem;
+            font-weight: 500;
+            color: #374151;
+            transition: background .15s, border-color .15s;
+        }
+        .mx-4.flex-auto .secondary-button:hover {
+            border-color: #008138;
+            color: #008138;
+            background: #f0fdf4;
+        }
+
+        /* Order items table */
+        .mx-4.flex-auto table thead {
+            background: #f9fafb;
+        }
+        .mx-4.flex-auto table thead th {
+            font-size: .75rem;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: #6b7280;
+        }
+        .mx-4.flex-auto table tbody tr {
+            font-size: .88rem;
+        }
+        .mx-4.flex-auto table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        /* Totals section */
+        .mx-4.flex-auto .grid.max-w-max.gap-2 {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            min-width: 280px;
+            font-size: .88rem;
+        }
+        .mx-4.flex-auto .grid.max-w-max.gap-2 .flex.w-full.justify-between {
+            color: #6b7280;
+            padding: .3rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .mx-4.flex-auto .grid.max-w-max.gap-2 .flex.w-full.justify-between:last-child { border-bottom: none; }
+        .mx-4.flex-auto .grid.max-w-max.gap-2 .font-semibold {
+            color: #012b17;
+            font-size: .95rem;
+            padding-top: .5rem;
+        }
+
+        /* Mobile order summary card */
+        .mx-4.flex-auto .rounded-lg.border {
+            border-radius: 14px;
+            border-color: #e5e7eb;
+            overflow: hidden;
+        }
+
+        /* Address & payment cards */
+        .mx-4.flex-auto .rounded-xl.border {
+            border-radius: 14px;
+            border-color: #e5e7eb;
+        }
+    </style>
+    @endpush
+
     <!-- Breadcrumbs -->
     @section('breadcrumbs')
         <x-shop::breadcrumbs
@@ -29,7 +111,7 @@
                     <span class="icon-arrow-left rtl:icon-arrow-right text-2xl"></span>
                 </a>
 
-                <h2 class="text-2xl font-medium ltr:ml-2.5 rtl:mr-2.5 max-md:text-xl max-sm:text-base md:ltr:ml-0 md:rtl:mr-0">
+                <h2 class="text-2xl font-medium ltr:ml-2.5 rtl:mr-2.5 max-md:text-xl max-sm:text-base md:ltr:ml-0 md:rtl:mr-0" style="font-family:'DM Serif Display',serif; color:#012b17; font-weight:400;">
                     @lang('shop::app.customers.account.orders.view.page-title', ['order_id' => $order->increment_id])
                 </h2>
             </div>
