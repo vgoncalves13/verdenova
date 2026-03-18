@@ -16,19 +16,19 @@ class MercadoPagoStatusController extends Controller
         $accessToken = core()->getConfigData('sales.payment_methods.mercadopago.access_token');
 
         $client = new Client(['base_uri' => 'https://api.mercadopago.com']);
-        $response = $client->get("/v1/payments/{$mpOrderId}", [
+        $response = $client->get("/v1/orders/{$mpOrderId}", [
             'headers' => ['Authorization' => "Bearer {$accessToken}"],
             'http_errors' => false,
         ]);
 
-        $mpOrder = json_decode((string) $response->getBody(), true);
+        $order = json_decode((string) $response->getBody(), true);
 
-        $mpStatus = $mpOrder['status'] ?? 'unknown';
+        $mpStatus = $order['status'] ?? 'unknown';
 
         // Normalise to: paid | pending | rejected
-        if ($mpStatus === 'approved') {
+        if ($mpStatus === 'processed') {
             $status = 'paid';
-        } elseif ($mpStatus === 'rejected' || $mpStatus === 'cancelled') {
+        } elseif (in_array($mpStatus, ['reverted', 'cancelled'])) {
             $status = 'rejected';
         } else {
             $status = 'pending';

@@ -3,6 +3,8 @@
 namespace Webkul\MercadoPago\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Webkul\MercadoPago\Console\Commands\ApproveMercadoPagoPayment;
+use Webkul\MercadoPago\Console\Commands\TestMercadoPagoPix;
 
 class MercadopagoServiceProvider extends ServiceProvider
 {
@@ -26,5 +28,12 @@ class MercadopagoServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'mercadopago');
 
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'mercadopago');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ApproveMercadoPagoPayment::class,
+                TestMercadoPagoPix::class,
+            ]);
+        }
     }
 }

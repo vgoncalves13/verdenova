@@ -436,7 +436,7 @@
                         <div class="vn-pix-qr-wrap">
                             <div class="vn-pix-qr-frame">
                                 <img
-                                    src="data:image/jpeg;base64,{{ $data['qr_code_base64'] }}"
+                                    src="data:image/png;base64,{{ $data['qr_code_base64'] }}"
                                     alt="QR Code Pix"
                                 >
                             </div>

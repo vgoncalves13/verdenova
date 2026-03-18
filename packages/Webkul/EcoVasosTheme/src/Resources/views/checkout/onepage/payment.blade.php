@@ -2,6 +2,7 @@
 
 <v-payment-methods
     :methods="paymentMethods"
+    :cart-total="cart.grand_total"
     @processing="stepForward"
     @processed="stepProcessed"
 >
@@ -140,7 +141,17 @@
                         <!-- Card Tab — uses MP cardPayment Brick (PCI-compliant, works on localhost) -->
                         <div v-show="mpTab === 'card'">
                             <div id="mp-card-brick" class="p-2"></div>
-                            <p v-if="mpCardError" class="px-6 pb-4 text-sm text-red-500">@{{ mpCardError }}</p>
+                            <div v-if="mpCardError" class="px-6 pb-4">
+                                <p class="mb-3 text-sm text-red-500">@{{ mpCardError }}</p>
+                                <button
+                                    v-if="mpCardRetry"
+                                    type="button"
+                                    class="w-full rounded-xl border border-darkGreen py-2.5 text-sm font-semibold text-darkGreen transition hover:bg-darkGreen hover:text-white"
+                                    @click="mpCardError = null; mpCardRetry = false; destroyMPFields(); $nextTick(() => requestAnimationFrame(() => initMPFields()))"
+                                >
+                                    Tentar novamente
+                                </button>
+                            </div>
                         </div>
 
                         <!-- PIX Tab -->
@@ -209,6 +220,11 @@
                     required: true,
                     default: () => null,
                 },
+
+                cartTotal: {
+                    type: Number,
+                    default: null,
+                },
             },
 
             emits: ['processing', 'processed'],
@@ -224,6 +240,7 @@
                     mpBrickController: null,
                     mpSubmitting: false,
                     mpCardError: null,
+                    mpCardRetry: false,
                     mpPixError: null,
                     mpBoletoError: null,
                 };
@@ -299,7 +316,7 @@
 
                     this.mpBrickController = await bricks.create('cardPayment', 'mp-card-brick', {
                         initialization: {
-                            amount: this.mpAmount,
+                            amount: this.cartTotal ?? this.mpAmount,
                         },
                         customization: {
                             visual: {
@@ -323,11 +340,12 @@
 
                                 try {
                                     await this.$axios.post("{{ route('mercadopago.token') }}", formData);
-                                    this.store(this.mpCurrentPayment);
+                                    await this.storePaymentAndPlaceOrder();
                                 } catch (e) {
                                     console.error('[MercadoPago] Card submit error:', e);
-                                    this.mpCardError = 'Erro ao processar o cartão. Verifique os dados e tente novamente.';
+                                    this.mpCardError = e.response?.data?.message ?? 'Erro ao processar o cartão. Verifique os dados e tente novamente.';
                                     this.mpSubmitting = false;
+                                    this.mpCardRetry = true;
                                 }
                             },
                         },
@@ -380,9 +398,6 @@
                 },
 
                 async storePaymentAndPlaceOrder() {
-                    // Save payment method to cart
-                    this.$emit('processing', 'review');
-
                     await this.$axios.post("{{ route('shop.checkout.onepage.payment_methods.store') }}", {
                         payment: this.mpCurrentPayment,
                     });

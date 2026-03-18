@@ -22,10 +22,10 @@ class MercadoPago extends Payment
     /**
      * Return the redirect URL after placing the order.
      *
-     * Uses the classic Payments API (/v1/payments), which works with TEST credentials.
-     * - Card (approved/accredited)           → success page
-     * - Pix / Boleto (pending)               → pending page with QR / boleto link
-     * - Rejected                             → throws exception shown in checkout
+     * Uses the Orders API (/v1/orders).
+     * - Card (processed)                      → success page
+     * - Pix / Boleto (action_required)        → pending page with QR / boleto link
+     * - Rejected                              → throws exception shown in checkout
      *
      * @return string
      */
@@ -35,31 +35,32 @@ class MercadoPago extends Payment
 
         $cart = $this->getCart();
 
-        $totalAmount = (float) number_format((float) $cart->grand_total, 2, '.', '');
+        $totalAmount = number_format((float) $cart->grand_total, 2, '.', '');
 
         $paymentTypeId = $formData['payment_type_id'] ?? 'credit_card';
         $paymentMethodId = $formData['payment_method_id'] ?? '';
 
         $payload = $this->buildPayload($formData, $paymentTypeId, $paymentMethodId, $totalAmount, $cart);
 
-        $response = $this->callPaymentsApi($payload);
+        $response = $this->callOrdersApi($payload);
 
         $status = $response['status'] ?? '';
-        $statusDetail = $response['status_detail'] ?? '';
 
-        if ($status === 'approved' && $statusDetail === 'accredited') {
+        if ($status === 'processed') {
             session()->forget(['mercadopago.payment_data', 'mercadopago.pending_payment']);
 
-            // Return null so Bagisto creates the order and redirects to success normally.
             return null;
         }
 
-        if ($status === 'pending' || $status === 'in_process') {
-            $qr = $response['point_of_interaction']['transaction_data'] ?? [];
-            $txData = $response['transaction_details'] ?? [];
+        if ($status === 'action_required') {
+            $payment = $response['transactions']['payments'][0] ?? [];
+            $paymentMethod = $payment['payment_method'] ?? [];
 
-            // Create the Bagisto order before redirecting to the pending page,
-            // because Bagisto only creates the order when getRedirectUrl() returns null.
+            Log::info('[MercadoPago] Pix/Boleto criado', [
+                'mp_order_id' => $response['id'] ?? null,
+                'payment_type' => $paymentTypeId,
+            ]);
+
             $order = $this->createBagistoOrder($cart);
 
             session([
@@ -67,11 +68,10 @@ class MercadoPago extends Payment
                     'mp_payment_id' => $response['id'] ?? null,
                     'bagisto_order_id' => $order?->id,
                     'payment_type' => $paymentTypeId,
-                    'ticket_url' => $txData['external_resource_url'] ?? null,
-                    'barcode_content' => $response['barcode']['content'] ?? null,
-                    'digitable_line' => $response['barcode']['content'] ?? null,
-                    'qr_code' => $qr['qr_code'] ?? null,
-                    'qr_code_base64' => $qr['qr_code_base64'] ?? null,
+                    'ticket_url' => $paymentMethod['ticket_url'] ?? null,
+                    'digitable_line' => $paymentMethod['barcode'] ?? null,
+                    'qr_code' => $paymentMethod['qr_code'] ?? null,
+                    'qr_code_base64' => $paymentMethod['qr_code_base64'] ?? null,
                 ],
             ]);
 
@@ -80,25 +80,25 @@ class MercadoPago extends Payment
             return route('mercadopago.pending');
         }
 
-        if ($status === 'rejected') {
-            Log::warning('[MercadoPago] Payment rejected', [
+        if (in_array($status, ['failed', 'reverted', 'cancelled'])) {
+            $statusDetail = $response['transactions']['payments'][0]['status_detail'] ?? $status;
+
+            Log::warning('[MercadoPago] Order failed/cancelled', [
+                'status' => $status,
                 'status_detail' => $statusDetail,
-                'payment_id' => $response['id'] ?? null,
+                'order_id' => $response['id'] ?? null,
             ]);
 
             throw new \Exception(trans('mercadopago::app.payment.rejected'));
         }
 
-        Log::error('[MercadoPago] Unexpected payment status', ['response' => $response]);
+        Log::error('[MercadoPago] Unexpected order status', ['response' => $response]);
 
         throw new \Exception(trans('mercadopago::app.payment.error'));
     }
 
     /**
      * Create the Bagisto order and deactivate the cart.
-     *
-     * Used for Pix/Boleto flows where getRedirectUrl() returns a non-null URL,
-     * which prevents Bagisto's OnepageController from creating the order itself.
      */
     protected function createBagistoOrder(mixed $cart): mixed
     {
@@ -119,63 +119,86 @@ class MercadoPago extends Payment
     }
 
     /**
-     * Build the Payments API payload based on the payment type.
+     * Build the Orders API payload.
      */
     protected function buildPayload(
         array $formData,
         string $paymentTypeId,
         string $paymentMethodId,
-        float $totalAmount,
+        string $totalAmount,
         mixed $cart
     ): array {
         $email = $cart->customer_email ?? ($formData['payer']['email'] ?? '');
+        $firstName = $cart->customer_first_name ?? ($formData['payer']['first_name'] ?? null);
+        $lastName = $cart->customer_last_name ?? ($formData['payer']['last_name'] ?? null);
+
+        $payer = ['email' => $email];
+
+        if ($firstName) {
+            $payer['first_name'] = $firstName;
+        }
+
+        if ($lastName) {
+            $payer['last_name'] = $lastName;
+        }
 
         $base = [
-            'transaction_amount' => $totalAmount,
-            'description' => 'Pedido #'.$cart->id,
+            'type' => 'online',
+            'processing_mode' => 'automatic',
             'external_reference' => (string) $cart->id,
-            'payer' => ['email' => $email],
+            'total_amount' => $totalAmount,
+            'payer' => $payer,
         ];
 
         if ($paymentTypeId === 'bank_transfer') {
-            return array_merge($base, ['payment_method_id' => 'pix']);
+            $base['transactions']['payments'][] = [
+                'amount' => $totalAmount,
+                'payment_method' => ['id' => 'pix', 'type' => 'bank_transfer'],
+            ];
+
+            return $base;
         }
 
         if ($paymentTypeId === 'ticket') {
-            return array_merge($base, [
-                'payment_method_id' => $paymentMethodId ?: 'bolbradesco',
-                'payment_type_id' => 'ticket',
-            ]);
+            $base['transactions']['payments'][] = [
+                'amount' => $totalAmount,
+                'payment_method' => [
+                    'id' => $paymentMethodId ?: 'bolbradesco',
+                    'type' => 'ticket',
+                ],
+            ];
+
+            return $base;
         }
 
         // Credit / debit card
-        $payload = array_merge($base, [
+        $paymentMethod = [
+            'id' => $paymentMethodId,
+            'type' => $paymentTypeId,
             'token' => $formData['token'] ?? '',
             'installments' => (int) ($formData['installments'] ?? 1),
-            'payment_method_id' => $paymentMethodId,
-        ]);
+        ];
 
-        if (! empty($formData['issuer_id'])) {
-            $payload['issuer_id'] = $formData['issuer_id'];
-        }
+        $base['transactions']['payments'][] = [
+            'amount' => $totalAmount,
+            'payment_method' => $paymentMethod,
+        ];
 
-        return $payload;
+        return $base;
     }
 
     /**
-     * POST to the MercadoPago Payments API (/v1/payments).
-     *
-     * Works with TEST-... credentials in sandbox mode.
+     * POST to the MercadoPago Orders API (/v1/orders).
      *
      * @throws \Exception
      */
-    protected function callPaymentsApi(array $payload): array
+    protected function callOrdersApi(array $payload): array
     {
         $client = new Client(['base_uri' => $this->getApiUrl()]);
 
         $idempotencyKey = sprintf('%s-%s', $payload['external_reference'], uniqid());
 
-        $response = $client->post('/v1/payments', [
+        $response = $client->post('/v1/orders', [
             'headers' => [
                 'Authorization' => 'Bearer '.$this->getConfigData('access_token'),
                 'X-Idempotency-Key' => $idempotencyKey,
@@ -188,8 +211,19 @@ class MercadoPago extends Payment
         $body = json_decode((string) $response->getBody(), true);
         $httpStatus = $response->getStatusCode();
 
+        // HTTP 402 means the order was created but a transaction failed.
+        // Return the body so getRedirectUrl() can inspect the order status.
+        if ($httpStatus === 402) {
+            Log::warning('[MercadoPago] Orders API 402 — transaction failed', [
+                'response' => $body,
+                'payload' => $payload,
+            ]);
+
+            return $body['data'] ?? $body ?? [];
+        }
+
         if ($httpStatus >= 400) {
-            Log::error('[MercadoPago] Payments API error', [
+            Log::error('[MercadoPago] Orders API error', [
                 'http_status' => $httpStatus,
                 'response' => $body,
                 'payload' => $payload,
@@ -203,7 +237,6 @@ class MercadoPago extends Payment
 
     /**
      * Return the payment method image URL.
-     * Falls back to the official MercadoPago logo.
      */
     public function getImage(): string
     {

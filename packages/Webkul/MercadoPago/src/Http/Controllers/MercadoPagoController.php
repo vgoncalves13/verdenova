@@ -5,11 +5,15 @@ namespace Webkul\MercadoPago\Http\Controllers;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Webkul\Sales\Repositories\InvoiceRepository;
 use Webkul\Sales\Repositories\OrderRepository;
 
 class MercadoPagoController extends Controller
 {
-    public function __construct(protected OrderRepository $orderRepository) {}
+    public function __construct(
+        protected OrderRepository $orderRepository,
+        protected InvoiceRepository $invoiceRepository,
+    ) {}
 
     /**
      * Store the Payment Brick form data in session so the payment class
@@ -65,7 +69,9 @@ class MercadoPagoController extends Controller
         $type = $request->input('type') ?? $request->input('topic');
         $dataId = $request->input('data.id') ?? $request->input('id');
 
-        if ($type === 'payment' && $dataId) {
+        \Log::info('[MercadoPago] Webhook recebido', ['type' => $type, 'data_id' => $dataId]);
+
+        if ($type === 'order' && $dataId) {
             $this->handleOrderNotification($dataId);
         }
 
@@ -81,8 +87,9 @@ class MercadoPagoController extends Controller
     {
         $secret = config('mercadopago.webhook_secret');
 
-        // If no secret configured, skip validation (not recommended in production).
-        if (! $secret) {
+        // Skip validation in sandbox or when no secret configured.
+        // In production (live_mode = true), the secret must be set.
+        if (! $secret || ! $request->boolean('live_mode')) {
             return;
         }
 
@@ -104,43 +111,80 @@ class MercadoPagoController extends Controller
         $calculated = hash_hmac('sha256', $template, $secret);
 
         if (! hash_equals($calculated, $v1)) {
+            \Log::debug('[MercadoPago] Webhook signature mismatch', [
+                'x_signature' => $xSignature,
+                'x_request_id' => $xRequestId,
+                'data_id' => $dataId,
+                'ts' => $ts,
+                'template' => $template,
+                'expected_v1' => $v1,
+                'calculated' => $calculated,
+            ]);
+
             throw new \Exception('Invalid webhook signature');
         }
     }
 
     /**
-     * Fetch the order from MP and update the Bagisto order status.
+     * Fetch the order from MP and mark the Bagisto order as paid (create invoice).
      */
     protected function handleOrderNotification(string $mpOrderId): void
     {
         $accessToken = core()->getConfigData('sales.payment_methods.mercadopago.access_token');
 
         $client = new Client(['base_uri' => 'https://api.mercadopago.com']);
-        $response = $client->get("/v1/payments/{$mpOrderId}", [
+        $response = $client->get("/v1/orders/{$mpOrderId}", [
             'headers' => ['Authorization' => "Bearer {$accessToken}"],
             'http_errors' => false,
         ]);
 
         $mpOrder = json_decode((string) $response->getBody(), true);
 
-        if (($mpOrder['status'] ?? '') !== 'approved') {
+        if (($mpOrder['status'] ?? '') !== 'processed') {
             return;
         }
 
-        $externalReference = $mpOrder['external_reference'] ?? null;
+        // external_reference holds the cart_id set when the MP order was created.
+        $cartId = $mpOrder['external_reference'] ?? null;
 
-        if (! $externalReference) {
+        if (! $cartId) {
             return;
         }
 
-        $order = $this->orderRepository->findOneByField('id', $externalReference);
+        $order = $this->orderRepository->findOneByField('cart_id', $cartId);
 
         if (! $order) {
+            \Log::warning('[MercadoPago] Webhook: order not found for cart_id', ['cart_id' => $cartId, 'mp_order_id' => $mpOrderId]);
+
             return;
         }
 
-        if ($order->status === 'pending') {
-            $this->orderRepository->updateOrderStatus($order, 'processing');
+        // Skip if already invoiced (idempotency).
+        if ($order->invoices->isNotEmpty()) {
+            return;
+        }
+
+        $items = [];
+
+        foreach ($order->items as $item) {
+            if ($item->qty_to_invoice > 0) {
+                $items[$item->id] = $item->qty_to_invoice;
+            }
+        }
+
+        if (empty($items)) {
+            return;
+        }
+
+        try {
+            $this->invoiceRepository->create([
+                'order_id' => $order->id,
+                'invoice' => ['items' => $items],
+            ]);
+
+            \Log::info('[MercadoPago] Webhook: invoice created', ['order_id' => $order->id, 'mp_order_id' => $mpOrderId]);
+        } catch (\Exception $e) {
+            \Log::error('[MercadoPago] Webhook: failed to create invoice', ['order_id' => $order->id, 'error' => $e->getMessage()]);
         }
     }
 }
