@@ -798,4 +798,251 @@ img.lazy {
         color: rgba(255, 255, 255, 0.4);
         margin-bottom: 10px;
     }
+
+    /* ── Mini Cart ────────────────────────────────────────── */
+
+    /* Badge on cart icon toggle */
+    .vn-cart-badge {
+        position: absolute;
+        top: -14px;
+        left: 18px;
+        background: #fac800;
+        color: #016630;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 6px;
+        border-radius: 100px;
+        line-height: 1.2;
+        min-width: 18px;
+        text-align: center;
+    }
+
+    /* Header wrapper override — make close icon white over green bg */
+    .vn-mc-header-area .icon-cancel {
+        color: rgba(255, 255, 255, 0.75) !important;
+        transition: color 0.15s;
+    }
+    .vn-mc-header-area .icon-cancel:hover {
+        color: #fac800 !important;
+    }
+
+    /* Bleed header block out of the drawer's default p-6 padding */
+    .vn-mc-header {
+        margin: -24px -24px 0;
+        background: linear-gradient(135deg, #016630 0%, #008138 100%);
+    }
+
+    @media (max-width: 768px) {
+        .vn-mc-header {
+            margin: -16px -16px 0;
+        }
+    }
+
+    .vn-mc-header__accent {
+        height: 3px;
+        background: linear-gradient(90deg, #016630, #008138 55%, #fac800);
+    }
+
+    .vn-mc-header__inner {
+        padding: 18px 24px 20px;
+    }
+
+    .vn-mc-header__title {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.4rem;
+        color: #fff;
+        line-height: 1.2;
+    }
+
+    .vn-mc-header__offer {
+        display: inline-block;
+        margin-top: 8px;
+        font-size: 11.5px;
+        color: rgba(255, 255, 255, 0.75);
+        background: rgba(250, 200, 0, 0.15);
+        border: 1px solid rgba(250, 200, 0, 0.3);
+        border-radius: 100px;
+        padding: 3px 12px;
+        max-width: 100%;
+    }
+
+    /* Cart item card */
+    .vn-mc-item {
+        display: flex;
+        gap: 14px;
+        padding: 14px;
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid rgba(1, 77, 36, 0.08);
+        transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .vn-mc-item:hover {
+        border-color: rgba(1, 77, 36, 0.2);
+        box-shadow: 0 2px 16px rgba(1, 77, 36, 0.08);
+    }
+
+    .vn-mc-item__img-wrap {
+        display: block;
+        flex-shrink: 0;
+    }
+
+    .vn-mc-item__img {
+        width: 86px;
+        height: 86px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid rgba(1, 77, 36, 0.08);
+    }
+
+    @media (max-width: 768px) {
+        .vn-mc-item__img {
+            width: 68px;
+            height: 68px;
+        }
+    }
+
+    .vn-mc-item__name {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #1a2214;
+        line-height: 1.4;
+        text-decoration: none;
+        transition: color 0.15s;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .vn-mc-item__name:hover {
+        color: #016630;
+    }
+
+    .vn-mc-item__price {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.05rem;
+        color: #016630;
+        white-space: nowrap;
+    }
+
+    .vn-mc-item__price-sub {
+        font-family: 'Poppins', sans-serif;
+        font-size: 10.5px;
+        font-weight: 400;
+        color: #9ca3af;
+    }
+
+    /* Remove button */
+    .vn-mc-remove {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.78rem;
+        color: #b0b8b0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 2px 0;
+        transition: color 0.15s;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .vn-mc-remove:hover {
+        color: #e53e3e;
+    }
+
+    /* Empty cart */
+    .vn-mc-empty-icon {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f4f1ea 0%, #e8dcc8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .vn-mc-empty-title {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.35rem;
+        color: #6b7264;
+    }
+
+    /* Footer */
+    .vn-mc-footer {
+        background: #fff;
+        border-top: 1px solid rgba(1, 77, 36, 0.08);
+    }
+
+    /* Subtotal strip */
+    .vn-mc-subtotal {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, #f4f1ea 0%, #ede8de 100%);
+        border-bottom: 1px solid rgba(1, 77, 36, 0.06);
+    }
+
+    .vn-mc-subtotal__label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #8a9180;
+    }
+
+    .vn-mc-total {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.8rem;
+        color: #016630;
+        line-height: 1;
+    }
+
+    /* Checkout CTA */
+    .vn-mc-btn-checkout {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 14px 24px;
+        background: #016630;
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: background 0.2s ease, transform 0.15s ease;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .vn-mc-btn-checkout:hover {
+        background: #008138;
+        transform: translateY(-1px);
+        color: #fff;
+    }
+
+    /* View cart link */
+    .vn-mc-btn-view-cart {
+        display: block;
+        width: 100%;
+        padding: 11px 24px;
+        text-align: center;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #016630;
+        border: 1px solid rgba(1, 77, 36, 0.22);
+        border-radius: 12px;
+        text-decoration: none;
+        transition: border-color 0.2s ease, background 0.2s ease;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .vn-mc-btn-view-cart:hover {
+        border-color: #016630;
+        background: rgba(1, 77, 36, 0.04);
+    }
 }
