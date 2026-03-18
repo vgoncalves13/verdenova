@@ -160,6 +160,32 @@ class MercadoPago extends Payment
         }
 
         if ($paymentTypeId === 'ticket') {
+            $cpf = preg_replace('/\D/', '', $formData['cpf'] ?? '');
+
+            if ($cpf) {
+                $payer['identification'] = ['type' => 'CPF', 'number' => $cpf];
+            }
+
+            $billing = $cart->billing_address;
+
+            if ($billing) {
+                $rawAddress = $billing->address ?? '';
+                $parts = array_map('trim', explode(',', $rawAddress, 2));
+                $streetName = $parts[0] ?? $rawAddress;
+                $streetNumber = $parts[1] ?? '0';
+
+                $payer['address'] = [
+                    'zip_code' => preg_replace('/\D/', '', $billing->postcode ?? ''),
+                    'street_name' => $streetName,
+                    'street_number' => $streetNumber ?: '0',
+                    'neighborhood' => $billing->city ?? '',
+                    'city' => $billing->city ?? '',
+                    'state'        => $billing->state ?? '',
+                ];
+            }
+
+            $base['payer'] = $payer;
+
             $base['transactions']['payments'][] = [
                 'amount' => $totalAmount,
                 'payment_method' => [

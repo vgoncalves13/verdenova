@@ -159,11 +159,20 @@
                         </div>
                         <h3 class="mb-2 font-semibold text-navyBlue">Pague com Boleto</h3>
                         <p class="mb-6 text-sm text-zinc-500">Prazo de pagamento: até 3 dias úteis. O boleto será gerado na próxima tela.</p>
+
+                        <input
+                            v-model="mpBoletoCpf"
+                            type="text"
+                            maxlength="14"
+                            placeholder="CPF do pagador (somente números)"
+                            class="mb-4 w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none focus:border-darkGreen"
+                        >
+
                         <p v-if="mpBoletoError" class="mb-3 text-sm text-red-500">@{{ mpBoletoError }}</p>
                         <button
                             type="button"
                             class="w-full rounded-xl bg-darkGreen py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
-                            :disabled="mpSubmitting"
+                            :disabled="mpSubmitting || mpBoletoCpf.replace(/\D/g, '').length < 11"
                             @click="submitBoleto()"
                         >
                             <span v-if="mpSubmitting">Gerando...</span>
@@ -208,6 +217,7 @@
                     mpCardRetry: false,
                     mpPixError: null,
                     mpBoletoError: null,
+                    mpBoletoCpf: '',
                 };
             },
 
@@ -357,6 +367,7 @@
                         await this.$axios.post("{{ route('mercadopago.token') }}", {
                             payment_type_id: 'ticket',
                             payment_method_id: 'bolbradesco',
+                            cpf: this.mpBoletoCpf,
                             payer: {},
                         });
 

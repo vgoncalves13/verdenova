@@ -29,6 +29,7 @@ class MercadoPagoController extends Controller
                 'installments',
                 'payer',
                 'issuer_id',
+                'cpf',
             ]),
         ]);
 
