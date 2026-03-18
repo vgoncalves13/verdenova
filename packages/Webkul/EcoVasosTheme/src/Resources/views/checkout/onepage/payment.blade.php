@@ -103,106 +103,72 @@
                 {!! view_render_event('bagisto.shop.checkout.onepage.payment_method.accordion.after') !!}
 
                 <!--
-                    MercadoPago Custom UI — rendered OUTSIDE the accordion so it has
-                    no hidden ancestors. Uses v-if (not v-show) so containers only enter
-                    the DOM when the method is selected; $nextTick then mounts the fields.
+                    MercadoPago Custom UI — rendered OUTSIDE the accordion.
+                    Each payment method (card, pix, boleto) is a separate Bagisto method.
                 -->
-                <template v-if="selectedMethod === 'mercadopago'">
+
+                <!-- Cartão -->
+                <template v-if="selectedMethod === 'mercadopago_card'">
                     <div class="mt-4 overflow-hidden rounded-2xl border border-darkGreen/20">
-
-                        <!-- Tabs -->
-                        <div class="flex border-b border-darkGreen/20 bg-green-50">
+                        <div id="mp-card-brick" class="p-2"></div>
+                        <div v-if="mpCardError" class="px-6 pb-4">
+                            <p class="mb-3 text-sm text-red-500">@{{ mpCardError }}</p>
                             <button
+                                v-if="mpCardRetry"
                                 type="button"
-                                class="flex-1 py-3 text-sm font-semibold transition-colors"
-                                :class="mpTab === 'card' ? 'bg-white text-darkGreen border-b-2 border-darkGreen' : 'text-zinc-500 hover:text-darkGreen'"
-                                @click="mpTab = 'card'"
+                                class="w-full rounded-xl border border-darkGreen py-2.5 text-sm font-semibold text-darkGreen transition hover:bg-darkGreen hover:text-white"
+                                @click="mpCardError = null; mpCardRetry = false; destroyMPFields(); $nextTick(() => requestAnimationFrame(() => initMPFields()))"
                             >
-                                Cartão
-                            </button>
-                            <button
-                                type="button"
-                                class="flex-1 py-3 text-sm font-semibold transition-colors"
-                                :class="mpTab === 'pix' ? 'bg-white text-darkGreen border-b-2 border-darkGreen' : 'text-zinc-500 hover:text-darkGreen'"
-                                @click="mpTab = 'pix'"
-                            >
-                                PIX
-                            </button>
-                            <button
-                                type="button"
-                                class="flex-1 py-3 text-sm font-semibold transition-colors"
-                                :class="mpTab === 'boleto' ? 'bg-white text-darkGreen border-b-2 border-darkGreen' : 'text-zinc-500 hover:text-darkGreen'"
-                                @click="mpTab = 'boleto'"
-                            >
-                                Boleto
+                                Tentar novamente
                             </button>
                         </div>
+                    </div>
+                </template>
 
-                        <!-- Card Tab — uses MP cardPayment Brick (PCI-compliant, works on localhost) -->
-                        <div v-show="mpTab === 'card'">
-                            <div id="mp-card-brick" class="p-2"></div>
-                            <div v-if="mpCardError" class="px-6 pb-4">
-                                <p class="mb-3 text-sm text-red-500">@{{ mpCardError }}</p>
-                                <button
-                                    v-if="mpCardRetry"
-                                    type="button"
-                                    class="w-full rounded-xl border border-darkGreen py-2.5 text-sm font-semibold text-darkGreen transition hover:bg-darkGreen hover:text-white"
-                                    @click="mpCardError = null; mpCardRetry = false; destroyMPFields(); $nextTick(() => requestAnimationFrame(() => initMPFields()))"
-                                >
-                                    Tentar novamente
-                                </button>
-                            </div>
+                <!-- PIX -->
+                <template v-if="selectedMethod === 'mercadopago_pix'">
+                    <div class="mt-4 overflow-hidden rounded-2xl border border-darkGreen/20 p-6 text-center">
+                        <div class="mb-4 flex justify-center">
+                            <svg class="h-14 w-14 text-darkGreen" viewBox="0 0 512 512" fill="currentColor">
+                                <path d="M242.4 292.5C247.8 287.1 257.1 287.1 262.5 292.5L339.5 369.5C353.7 383.7 372.6 391.5 392.6 391.5H407.7L310.2 488.1C280.3 517.7 231.1 517.7 201.2 488.1L103.3 391.5H118.4C138.4 391.5 157.3 383.7 171.5 369.5L242.4 292.5zM262.5 218.9C257.1 224.4 247.8 224.4 242.4 218.9L171.5 141.9C157.3 127.7 138.4 119.9 118.4 119.9H103.3L201.2 23.3C231.1-6.3 280.3-6.3 310.2 23.3L407.7 119.9H392.6C372.6 119.9 353.7 127.7 339.5 141.9L262.5 218.9zM112 144H118.4C132 144 144.1 149.3 153 158.1L240.1 244.4C253.1 257.4 258.9 257.4 271.9 244.4L358.1 158.1C367 149.3 379.1 144 392.6 144H399C419 144 438.6 151.5 453.4 165.2L484.3 195.2C512.5 222.9 512.5 268.7 484.3 296.5L453.4 326.5C438.6 340.2 419 347.7 399 347.7H392.6C379.1 347.7 367 342.4 358.1 333.6L271.9 247.3C258.9 234.3 253.1 234.3 240.1 247.3L153 333.6C144.1 342.4 132 347.7 118.4 347.7H112C92 347.7 72.4 340.2 57.6 326.5L26.7 296.5C-1.5 268.7-1.5 222.9 26.7 195.2L57.6 165.2C72.4 151.5 92 144 112 144z"/>
+                            </svg>
                         </div>
-
-                        <!-- PIX Tab -->
-                        <div
-                            class="p-6 text-center"
-                            v-show="mpTab === 'pix'"
+                        <h3 class="mb-2 font-semibold text-navyBlue">Pague com PIX</h3>
+                        <p class="mb-6 text-sm text-zinc-500">Pagamento instantâneo. O QR Code será gerado na próxima tela.</p>
+                        <p v-if="mpPixError" class="mb-3 text-sm text-red-500">@{{ mpPixError }}</p>
+                        <button
+                            type="button"
+                            class="w-full rounded-xl bg-darkGreen py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                            :disabled="mpSubmitting"
+                            @click="submitPix()"
                         >
-                            <div class="mb-4 flex justify-center">
-                                <svg class="h-14 w-14 text-darkGreen" viewBox="0 0 512 512" fill="currentColor">
-                                    <path d="M242.4 292.5C247.8 287.1 257.1 287.1 262.5 292.5L339.5 369.5C353.7 383.7 372.6 391.5 392.6 391.5H407.7L310.2 488.1C280.3 517.7 231.1 517.7 201.2 488.1L103.3 391.5H118.4C138.4 391.5 157.3 383.7 171.5 369.5L242.4 292.5zM262.5 218.9C257.1 224.4 247.8 224.4 242.4 218.9L171.5 141.9C157.3 127.7 138.4 119.9 118.4 119.9H103.3L201.2 23.3C231.1-6.3 280.3-6.3 310.2 23.3L407.7 119.9H392.6C372.6 119.9 353.7 127.7 339.5 141.9L262.5 218.9zM112 144H118.4C132 144 144.1 149.3 153 158.1L240.1 244.4C253.1 257.4 258.9 257.4 271.9 244.4L358.1 158.1C367 149.3 379.1 144 392.6 144H399C419 144 438.6 151.5 453.4 165.2L484.3 195.2C512.5 222.9 512.5 268.7 484.3 296.5L453.4 326.5C438.6 340.2 419 347.7 399 347.7H392.6C379.1 347.7 367 342.4 358.1 333.6L271.9 247.3C258.9 234.3 253.1 234.3 240.1 247.3L153 333.6C144.1 342.4 132 347.7 118.4 347.7H112C92 347.7 72.4 340.2 57.6 326.5L26.7 296.5C-1.5 268.7-1.5 222.9 26.7 195.2L57.6 165.2C72.4 151.5 92 144 112 144z"/>
-                                </svg>
-                            </div>
-                            <h3 class="mb-2 font-semibold text-navyBlue">Pague com PIX</h3>
-                            <p class="mb-6 text-sm text-zinc-500">Pagamento instantâneo. O QR Code será gerado na próxima tela.</p>
-                            <p v-if="mpPixError" class="mb-3 text-sm text-red-500">@{{ mpPixError }}</p>
-                            <button
-                                type="button"
-                                class="w-full rounded-xl bg-darkGreen py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
-                                :disabled="mpSubmitting"
-                                @click="submitPix()"
-                            >
-                                <span v-if="mpSubmitting">Gerando...</span>
-                                <span v-else>Gerar QR Code PIX</span>
-                            </button>
-                        </div>
+                            <span v-if="mpSubmitting">Gerando...</span>
+                            <span v-else>Gerar QR Code PIX</span>
+                        </button>
+                    </div>
+                </template>
 
-                        <!-- Boleto Tab -->
-                        <div
-                            class="p-6 text-center"
-                            v-show="mpTab === 'boleto'"
+                <!-- Boleto -->
+                <template v-if="selectedMethod === 'mercadopago_boleto'">
+                    <div class="mt-4 overflow-hidden rounded-2xl border border-darkGreen/20 p-6 text-center">
+                        <div class="mb-4 flex justify-center">
+                            <svg class="h-14 w-14 text-darkGreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                                <path d="M7 8v8M10 8v8M14 8v8M17 8v8M5 8v8"/>
+                            </svg>
+                        </div>
+                        <h3 class="mb-2 font-semibold text-navyBlue">Pague com Boleto</h3>
+                        <p class="mb-6 text-sm text-zinc-500">Prazo de pagamento: até 3 dias úteis. O boleto será gerado na próxima tela.</p>
+                        <p v-if="mpBoletoError" class="mb-3 text-sm text-red-500">@{{ mpBoletoError }}</p>
+                        <button
+                            type="button"
+                            class="w-full rounded-xl bg-darkGreen py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                            :disabled="mpSubmitting"
+                            @click="submitBoleto()"
                         >
-                            <div class="mb-4 flex justify-center">
-                                <svg class="h-14 w-14 text-darkGreen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <rect x="2" y="4" width="20" height="16" rx="2"/>
-                                    <path d="M7 8v8M10 8v8M14 8v8M17 8v8M5 8v8"/>
-                                </svg>
-                            </div>
-                            <h3 class="mb-2 font-semibold text-navyBlue">Pague com Boleto</h3>
-                            <p class="mb-6 text-sm text-zinc-500">Prazo de pagamento: até 3 dias úteis. O boleto será gerado na próxima tela.</p>
-                            <p v-if="mpBoletoError" class="mb-3 text-sm text-red-500">@{{ mpBoletoError }}</p>
-                            <button
-                                type="button"
-                                class="w-full rounded-xl bg-darkGreen py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
-                                :disabled="mpSubmitting"
-                                @click="submitBoleto()"
-                            >
-                                <span v-if="mpSubmitting">Gerando...</span>
-                                <span v-else>Gerar Boleto</span>
-                            </button>
-                        </div>
-
+                            <span v-if="mpSubmitting">Gerando...</span>
+                            <span v-else>Gerar Boleto</span>
+                        </button>
                     </div>
                 </template>
 
@@ -236,7 +202,6 @@
                     mpPublicKey: @json(core()->getConfigData('sales.payment_methods.mercadopago.public_key')),
                     mpAmount: {{ (float) (optional(\Webkul\Checkout\Facades\Cart::getCart())->grand_total ?? 0) }},
 
-                    mpTab: 'card',
                     mpBrickController: null,
                     mpSubmitting: false,
                     mpCardError: null,
@@ -249,12 +214,18 @@
             methods: {
                 onMethodChange(payment) {
                     const code = payment.method ?? payment.payment?.method;
+                    const mpCodes = ['mercadopago_card', 'mercadopago_pix', 'mercadopago_boleto'];
 
-                    if (code === 'mercadopago') {
-                        this.selectedMethod = 'mercadopago';
+                    if (mpCodes.includes(code)) {
+                        this.selectedMethod = code;
                         this.mpCurrentPayment = payment;
-                        // v-if on the MP container: wait for Vue DOM update AND browser layout pass
-                        this.$nextTick(() => requestAnimationFrame(() => this.initMPFields()));
+
+                        if (code === 'mercadopago_card') {
+                            // v-if on the card container: wait for Vue DOM update AND browser layout pass
+                            this.$nextTick(() => requestAnimationFrame(() => this.initMPFields()));
+                        } else {
+                            this.destroyMPFields();
+                        }
                     } else {
                         this.selectedMethod = code;
                         this.destroyMPFields();

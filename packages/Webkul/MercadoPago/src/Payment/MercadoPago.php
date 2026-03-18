@@ -236,6 +236,29 @@ class MercadoPago extends Payment
     }
 
     /**
+     * Fields that are shared across all MercadoPago methods (card, pix, boleto).
+     * All other fields (active, title, sort, etc.) use the method's own code.
+     */
+    protected array $sharedConfigFields = [
+        'access_token',
+        'public_key',
+        'sandbox',
+        'pix_expiration',
+    ];
+
+    /**
+     * Read shared operational config from the 'mercadopago' namespace.
+     * Display/status fields use the method's own code so each method can be
+     * independently enabled and has its own title.
+     */
+    public function getConfigData($field): mixed
+    {
+        $namespace = in_array($field, $this->sharedConfigFields) ? 'mercadopago' : $this->code;
+
+        return core()->getConfigData('sales.payment_methods.'.$namespace.'.'.$field);
+    }
+
+    /**
      * Return the payment method image URL.
      */
     public function getImage(): string
