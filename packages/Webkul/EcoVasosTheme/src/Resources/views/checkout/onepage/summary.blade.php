@@ -183,63 +183,7 @@
     {!! view_render_event('bagisto.shop.checkout.onepage.summary.delivery_charges.after') !!}
 
 
-    <!-- Taxes -->
     {!! view_render_event('bagisto.shop.checkout.onepage.summary.tax.before') !!}
-
-    <div
-        class="flex justify-between text-right"
-        v-if="! cart.tax_total"
-    >
-        <p class="text-base max-md:font-normal max-sm:text-sm">
-            @lang('shop::app.checkout.onepage.summary.tax')
-        </p>
-
-        <p class="text-lg font-semibold max-sm:text-sm">
-            @{{ cart.formatted_tax_total }}
-        </p>
-    </div>
-
-    <div
-        class="flex flex-col gap-2 border-y py-2"
-        v-else
-    >
-        <div
-            class="flex cursor-pointer justify-between text-right"
-            @click="cart.show_taxes = ! cart.show_taxes"
-        >
-            <p class="text-base max-md:font-normal max-sm:text-sm">
-                @lang('shop::app.checkout.onepage.summary.tax')
-            </p>
-
-            <p class="flex items-center gap-1 text-base font-medium max-sm:text-sm">
-                @{{ cart.formatted_tax_total }}
-                
-                <span
-                    class="text-xl"
-                    :class="{'icon-arrow-up': cart.show_taxes, 'icon-arrow-down': ! cart.show_taxes}"
-                ></span>
-            </p>
-        </div>
-
-        <div
-            class="flex flex-col gap-1"
-            v-show="cart.show_taxes"
-        >
-            <div
-                class="flex justify-between gap-1 text-right"
-                v-for="(amount, index) in cart.applied_taxes"
-            >
-                <p class="text-sm max-md:font-normal">
-                    @{{ index }}
-                </p>
-
-                <p class="text-sm font-medium">
-                    @{{ amount }}
-                </p>
-            </div>
-        </div>
-    </div>
-
     {!! view_render_event('bagisto.shop.checkout.onepage.summary.tax.after') !!}
 
     <!-- Cart Grand Total -->
