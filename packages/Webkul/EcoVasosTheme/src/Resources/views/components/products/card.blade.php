@@ -53,7 +53,6 @@
         font-weight: 700;
         letter-spacing: .04em;
         text-transform: uppercase;
-        z-index: 2;
     }
     .eco-card-badge-sale { background: #ef4444; color: #fff; }
     .eco-card-badge-new  { background: #008138; color: #fff; }
