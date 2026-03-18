@@ -246,10 +246,12 @@
 
     /* logo */
     .eco-logo-wrap {
+        display: flex;
+        justify-content: center;
         margin-bottom: 2rem;
     }
     .eco-logo-wrap img {
-        height: 32px;
+        height: 96px;
         width: auto;
     }
 
@@ -540,10 +542,10 @@
                         aria-label="@lang('shop::app.customers.signup-form.bagisto')"
                     >
                         <img
-                            src="{{ core()->getCurrentChannel()->logo_url ?? bagisto_asset('images/logo.svg') }}"
+                            src="{{ asset('images/logo-verde.png') }}"
                             alt="{{ config('app.name') }}"
-                            width="131"
-                            height="29"
+                            width="393"
+                            height="87"
                         >
                     </a>
                 </div>
