@@ -143,85 +143,119 @@
                 <!-- Guest Dropdown -->
                 @guest('customer')
                     <x-slot:content>
-                        <div class="grid gap-2.5">
-                            <p class="text-xl font-dmserif">
-                                @lang('shop::app.components.layouts.header.desktop.bottom.welcome-guest')
-                            </p>
+                        <div style="font-family:'Poppins',sans-serif;">
+                            <!-- Header -->
+                            <div style="display:flex; align-items:center; gap:.6rem; margin-bottom:.6rem;">
+                                <div style="width:36px;height:36px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#008138" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:#012b17;margin:0;line-height:1.2;">
+                                        @lang('shop::app.components.layouts.header.desktop.bottom.welcome-guest')
+                                    </p>
+                                </div>
+                            </div>
 
-                            <p class="text-sm">
+                            <p style="font-size:.78rem;color:#9ca3af;margin-bottom:.9rem;line-height:1.5;">
                                 @lang('shop::app.components.layouts.header.desktop.bottom.dropdown-text')
                             </p>
+
+                            <hr style="border:none;border-top:1px solid #f3f4f6;margin-bottom:1rem;">
+
+                            {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.customers_action.before') !!}
+
+                            <div style="display:flex;gap:.6rem;">
+                                {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.sign_in_button.before') !!}
+
+                                <a
+                                    href="{{ route('shop.customer.session.create') }}"
+                                    style="flex:1;display:block;text-align:center;padding:.55rem .75rem;background:#008138;color:#fff;border:1.5px solid #008138;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;transition:background .15s;"
+                                    onmouseover="this.style.background='#016630';this.style.borderColor='#016630';"
+                                    onmouseout="this.style.background='#008138';this.style.borderColor='#008138';"
+                                >
+                                    @lang('shop::app.components.layouts.header.desktop.bottom.sign-in')
+                                </a>
+
+                                <a
+                                    href="{{ route('shop.customers.register.index') }}"
+                                    style="flex:1;display:block;text-align:center;padding:.55rem .75rem;background:transparent;color:#008138;border:1.5px solid #008138;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;transition:background .15s,color .15s;"
+                                    onmouseover="this.style.background='#008138';this.style.color='#fff';"
+                                    onmouseout="this.style.background='transparent';this.style.color='#008138';"
+                                >
+                                    @lang('shop::app.components.layouts.header.desktop.bottom.sign-up')
+                                </a>
+
+                                {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.sign_up_button.after') !!}
+                            </div>
+
+                            {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.customers_action.after') !!}
                         </div>
-
-                        <p class="w-full mt-3 border border-zinc-200"></p>
-
-                        {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.customers_action.before') !!}
-
-                        <div class="flex gap-4 mt-6">
-                            {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.sign_in_button.before') !!}
-
-                            <a
-                                href="{{ route('shop.customer.session.create') }}"
-                                class="block m-0 mx-auto text-base text-center primary-button w-max rounded-2xl px-7 max-md:rounded-lg ltr:ml-0 rtl:mr-0"
-                            >
-                                @lang('shop::app.components.layouts.header.desktop.bottom.sign-in')
-                            </a>
-
-                            <a
-                                href="{{ route('shop.customers.register.index') }}"
-                                class="block m-0 mx-auto text-base text-center border-2 secondary-button w-max rounded-2xl px-7 max-md:rounded-lg max-md:py-3 ltr:ml-0 rtl:mr-0"
-                            >
-                                @lang('shop::app.components.layouts.header.desktop.bottom.sign-up')
-                            </a>
-
-                            {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.sign_up_button.after') !!}
-                        </div>
-
-                        {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.customers_action.after') !!}
                     </x-slot>
                 @endguest
 
                 <!-- Customers Dropdown -->
                 @auth('customer')
                     <x-slot:content class="!p-0">
-                        <div class="grid gap-2.5 p-5 pb-0">
-                            <p class="text-xl font-dmserif" v-pre>
-                                @lang('shop::app.components.layouts.header.desktop.bottom.welcome')’
-                                {{ auth()->guard('customer')->user()->first_name }}
-                            </p>
-
-                            <p class="text-sm">
-                                @lang('shop::app.components.layouts.header.desktop.bottom.dropdown-text')
-                            </p>
+                        <!-- Auth header -->
+                        <div style="padding:1rem 1.1rem .75rem;font-family:'Poppins',sans-serif;background:#f9fdf9;border-bottom:1px solid #f0faf4;">
+                            <div style="display:flex;align-items:center;gap:.65rem;">
+                                <div style="width:36px;height:36px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <span style="font-size:.85rem;font-weight:700;color:#008138;" v-pre>
+                                        {{ strtoupper(substr(auth()->guard('customer')->user()->first_name, 0, 1)) }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p style="font-family:'DM Serif Display',serif;font-size:1rem;color:#012b17;margin:0;line-height:1.2;" v-pre>
+                                        @lang('shop::app.components.layouts.header.desktop.bottom.welcome'),
+                                        {{ auth()->guard('customer')->user()->first_name }}
+                                    </p>
+                                    <p style="font-size:.72rem;color:#9ca3af;margin:0;">
+                                        @lang('shop::app.components.layouts.header.desktop.bottom.dropdown-text')
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
-                        <p class="w-full mt-3 border border-zinc-200"></p>
-
-                        <div class="mt-2.5 grid gap-1 pb-2.5">
+                        <!-- Nav links -->
+                        <div style="padding:.4rem 0 .5rem;font-family:'Poppins',sans-serif;">
                             {!! view_render_event('bagisto.shop.components.layouts.header.desktop.bottom.profile_dropdown.links.before') !!}
 
                             <a
-                                class="px-5 py-2 text-base cursor-pointer hover:bg-gray-100"
                                 href="{{ route('shop.customers.account.profile.index') }}"
+                                style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1.1rem;font-size:.83rem;color:#374151;text-decoration:none;transition:background .1s,color .1s;"
+                                onmouseover="this.style.background='#f0fdf4';this.style.color='#008138';"
+                                onmouseout="this.style.background='transparent';this.style.color='#374151';"
                             >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                 @lang('shop::app.components.layouts.header.desktop.bottom.profile')
                             </a>
 
                             <a
-                                class="px-5 py-2 text-base cursor-pointer hover:bg-gray-100"
                                 href="{{ route('shop.customers.account.orders.index') }}"
+                                style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1.1rem;font-size:.83rem;color:#374151;text-decoration:none;transition:background .1s,color .1s;"
+                                onmouseover="this.style.background='#f0fdf4';this.style.color='#008138';"
+                                onmouseout="this.style.background='transparent';this.style.color='#374151';"
                             >
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                                 @lang('shop::app.components.layouts.header.desktop.bottom.orders')
                             </a>
 
                             @if (core()->getConfigData('customer.settings.wishlist.wishlist_option'))
                                 <a
-                                    class="px-5 py-2 text-base cursor-pointer hover:bg-gray-100"
                                     href="{{ route('shop.customers.account.wishlist.index') }}"
+                                    style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1.1rem;font-size:.83rem;color:#374151;text-decoration:none;transition:background .1s,color .1s;"
+                                    onmouseover="this.style.background='#f0fdf4';this.style.color='#008138';"
+                                    onmouseout="this.style.background='transparent';this.style.color='#374151';"
                                 >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                                     @lang('shop::app.components.layouts.header.desktop.bottom.wishlist')
                                 </a>
                             @endif
+
+                            <hr style="border:none;border-top:1px solid #f3f4f6;margin:.3rem 0;">
 
                             <!--Customers logout-->
                             @auth('customer')
@@ -232,10 +266,13 @@
                                 />
 
                                 <a
-                                    class="px-5 py-2 text-base cursor-pointer hover:bg-gray-100"
                                     href="{{ route('shop.customer.session.destroy') }}"
                                     onclick="event.preventDefault(); document.getElementById('customerLogout').submit();"
+                                    style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1.1rem;font-size:.83rem;color:#9ca3af;text-decoration:none;transition:background .1s,color .1s;"
+                                    onmouseover="this.style.background='#fef2f2';this.style.color='#ef4444';"
+                                    onmouseout="this.style.background='transparent';this.style.color='#9ca3af';"
                                 >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                                     @lang('shop::app.components.layouts.header.desktop.bottom.logout')
                                 </a>
                             @endauth
