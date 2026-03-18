@@ -46,6 +46,151 @@
     <meta property="og:url" content="{{ route('shop.product_or_category.index', $product->url_key) }}" />
 @endPush
 
+@push('styles')
+<style>
+    /* ── EcoVasos Product Detail Page ── */
+
+    /* Product name */
+    .eco-product-name {
+        font-family: 'DM Serif Display', serif !important;
+        font-size: 2rem !important;
+        font-weight: 400 !important;
+        color: #012b17 !important;
+        line-height: 1.25 !important;
+    }
+    @media (max-width: 640px) {
+        .eco-product-name { font-size: 1.5rem !important; }
+    }
+
+    /* Price */
+    .eco-product-price {
+        color: #008138 !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        font-family: 'Poppins', sans-serif;
+    }
+    .eco-product-price del,
+    .eco-product-price .price-label-old-price {
+        color: #9ca3af !important;
+        font-size: 1rem !important;
+        font-weight: 400 !important;
+    }
+    @media (max-width: 640px) {
+        .eco-product-price { font-size: 1.2rem !important; }
+    }
+
+    /* Wishlist icon button */
+    .eco-product-wishlist-btn {
+        border-color: #e5e7eb !important;
+        border-radius: 10px !important;
+        transition: border-color .15s, color .15s !important;
+    }
+    .eco-product-wishlist-btn:hover {
+        border-color: #fca5a5 !important;
+        color: #ef4444 !important;
+    }
+
+    /* Short description */
+    .eco-product-short-desc {
+        font-family: 'Poppins', sans-serif;
+        font-size: .95rem !important;
+        color: #6b7280 !important;
+        line-height: 1.7 !important;
+    }
+
+    /* Quantity changer on detail page */
+    .eco-product-qty [class*="rounded-xl"],
+    .eco-product-qty [class*="rounded-lg"] {
+        border-color: #d1d5db !important;
+        border-radius: 10px !important;
+    }
+
+    /* Add to Cart (secondary-button override) */
+    .eco-product-add-btn.secondary-button {
+        background: transparent !important;
+        border: 1.5px solid #008138 !important;
+        color: #008138 !important;
+        border-radius: 10px !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: .9rem !important;
+        transition: background .15s, color .15s !important;
+    }
+    .eco-product-add-btn.secondary-button:hover:not(:disabled) {
+        background: #008138 !important;
+        color: #fff !important;
+    }
+    .eco-product-add-btn.secondary-button:disabled {
+        border-color: #d1d5db !important;
+        color: #9ca3af !important;
+        cursor: default !important;
+    }
+
+    /* Buy Now (primary-button override) */
+    .eco-product-buy-btn.primary-button {
+        background: #008138 !important;
+        border-color: #008138 !important;
+        border-radius: 10px !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: .9rem !important;
+        transition: background .15s !important;
+    }
+    .eco-product-buy-btn.primary-button:hover:not(:disabled) {
+        background: #016630 !important;
+        border-color: #016630 !important;
+    }
+
+    /* Compare link */
+    .eco-product-compare {
+        font-size: .85rem !important;
+        color: #9ca3af !important;
+        transition: color .15s !important;
+        font-family: 'Poppins', sans-serif;
+    }
+    .eco-product-compare:hover { color: #374151 !important; }
+
+    /* Description tabs - green active underline */
+    [id$="-tab-button"][aria-selected="true"],
+    [id$="-tab"][aria-selected="true"] {
+        border-bottom-color: #008138 !important;
+        color: #008138 !important;
+    }
+
+    /* Description content */
+    .eco-product-description {
+        font-family: 'Poppins', sans-serif;
+        font-size: .95rem;
+        color: #4b5563;
+        line-height: 1.8;
+    }
+
+    /* Additional info table */
+    .eco-product-info-label {
+        font-size: .85rem;
+        font-weight: 600;
+        color: #111827;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        font-family: 'Poppins', sans-serif;
+    }
+    .eco-product-info-value {
+        font-size: .88rem;
+        color: #6b7280;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* Accordion headers */
+    .eco-product-accordion-header {
+        background: #f9fafb !important;
+        border-radius: 8px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        color: #111827;
+    }
+</style>
+@endpush
+
 <!-- Page Layout -->
 <x-shop::layouts>
     <!-- Page Title -->
@@ -71,7 +216,7 @@
     </v-product>
 
     <!-- Information Section -->
-    <div class="1180:mt-20">
+    <div class="1180:mt-20 pb-16 max-sm:pb-10">
         <div class="max-1180:hidden">
             <x-shop::tabs
                 position="center"
@@ -158,7 +303,7 @@
     </div>
 
     <!-- Information Section -->
-    <div class="container mt-6 grid gap-3 !p-0 max-1180:px-5 1180:hidden">
+    <div class="container mt-6 grid gap-3 !p-0 max-1180:px-5 1180:hidden pb-16 max-sm:pb-10">
         <!-- Description Accordion -->
         <x-shop::accordion
             class="max-md:border-none"
@@ -298,13 +443,13 @@
                                 {!! view_render_event('bagisto.shop.products.name.before', ['product' => $product]) !!}
 
                                 <div class="flex justify-between gap-4">
-                                    <h1 class="text-3xl font-medium break-words max-sm:text-xl" v-pre>
+                                    <h1 class="eco-product-name break-words" v-pre>
                                         {{ $product->name }}
                                     </h1>
 
                                     @if (core()->getConfigData('customer.settings.wishlist.wishlist_option'))
                                         <div
-                                            class="flex max-h-[46px] min-h-[46px] min-w-[46px] cursor-pointer items-center justify-center rounded-full border bg-white text-2xl transition-all hover:opacity-[0.8] max-sm:max-h-7 max-sm:min-h-7 max-sm:min-w-7 max-sm:text-base"
+                                            class="eco-product-wishlist-btn flex max-h-[46px] min-h-[46px] min-w-[46px] cursor-pointer items-center justify-center rounded-full border bg-white text-2xl transition-all max-sm:max-h-7 max-sm:min-h-7 max-sm:min-w-7 max-sm:text-base"
                                             role="button"
                                             aria-label="@lang('shop::app.products.view.add-to-wishlist')"
                                             tabindex="0"
@@ -342,7 +487,7 @@
                                 <!-- Pricing -->
                                 {!! view_render_event('bagisto.shop.products.price.before', ['product' => $product]) !!}
 
-                                <p class="mt-[22px] flex items-center gap-2.5 text-2xl !font-medium max-sm:mt-2 max-sm:gap-x-2.5 max-sm:gap-y-0 max-sm:text-lg">
+                                <p class="eco-product-price mt-[22px] flex items-center gap-2.5 max-sm:mt-2">
                                     {!! $product->getTypeInstance()->getPriceHtml() !!}
                                 </p>
 
@@ -366,7 +511,7 @@
 
                                 {!! view_render_event('bagisto.shop.products.short_description.before', ['product' => $product]) !!}
 
-                                <p class="mt-6 text-lg text-zinc-500 max-sm:mt-1.5 max-sm:text-sm">
+                                <p class="eco-product-short-desc mt-6 max-sm:mt-1.5">
                                     {!! $product->short_description !!}
                                 </p>
 
@@ -385,7 +530,7 @@
                                 @include('shop::products.view.types.booking')
 
                                 <!-- Product Actions and Quantity Box -->
-                                <div class="mt-8 flex max-w-[470px] gap-4 max-sm:mt-4">
+                                <div class="eco-product-qty mt-8 flex max-w-[470px] gap-4 max-sm:mt-4">
 
                                     {!! view_render_event('bagisto.shop.products.view.quantity.before', ['product' => $product]) !!}
 
@@ -405,7 +550,7 @@
 
                                         <x-shop::button
                                             type="submit"
-                                            class="secondary-button w-full max-w-full max-md:py-3 max-sm:rounded-lg max-sm:py-1.5"
+                                            class="eco-product-add-btn secondary-button w-full max-w-full max-md:py-3 max-sm:rounded-lg max-sm:py-1.5"
                                             button-type="secondary-button"
                                             :loading="false"
                                             :title="trans('shop::app.products.view.add-to-cart')"
@@ -426,7 +571,7 @@
                                     @if (core()->getConfigData('catalog.products.storefront.buy_now_button_display'))
                                         <x-shop::button
                                             type="submit"
-                                            class="primary-button mt-5 w-full max-w-[470px] max-md:py-3 max-sm:mt-3 max-sm:rounded-lg max-sm:py-1.5"
+                                            class="eco-product-buy-btn primary-button mt-5 w-full max-w-[470px] max-md:py-3 max-sm:mt-3 max-sm:rounded-lg max-sm:py-1.5"
                                             button-type="primary-button"
                                             :title="trans('shop::app.products.view.buy-now')"
                                             :disabled="! $product->isSaleable(1)"
@@ -446,7 +591,7 @@
                                     {!! view_render_event('bagisto.shop.products.view.compare.before', ['product' => $product]) !!}
 
                                     <div
-                                        class="flex cursor-pointer items-center justify-center gap-2.5 max-sm:gap-1.5 max-sm:text-base"
+                                        class="eco-product-compare flex cursor-pointer items-center justify-center gap-2.5 max-sm:gap-1.5 max-sm:text-base"
                                         role="button"
                                         tabindex="0"
                                         @click="is_buy_now=0; addToCompare({{ $product->id }})"

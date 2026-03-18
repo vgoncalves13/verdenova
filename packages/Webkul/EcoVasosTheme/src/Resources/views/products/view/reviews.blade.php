@@ -1,3 +1,153 @@
+@pushOnce('styles')
+<style>
+    /* ── Reviews section identity ── */
+
+    /* "Escrever avaliação" button */
+    .eco-review-write-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: .5rem !important;
+        padding: .65rem 1.25rem !important;
+        border: 1.5px solid #008138 !important;
+        border-radius: 10px !important;
+        color: #008138 !important;
+        font-size: .88rem !important;
+        font-weight: 600 !important;
+        font-family: 'Poppins', sans-serif !important;
+        background: transparent !important;
+        cursor: pointer !important;
+        transition: background .15s, color .15s !important;
+        width: 100% !important;
+    }
+    .eco-review-write-btn:hover {
+        background: #008138 !important;
+        color: #fff !important;
+    }
+
+    /* Submit "Enviar avaliação" */
+    .eco-review-submit-btn {
+        background: #008138 !important;
+        border: 1.5px solid #008138 !important;
+        border-radius: 10px !important;
+        color: #fff !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: .9rem !important;
+        padding: .75rem 2.5rem !important;
+        transition: background .15s !important;
+        cursor: pointer !important;
+    }
+    .eco-review-submit-btn:hover { background: #016630 !important; border-color: #016630 !important; }
+
+    /* Cancel button */
+    .eco-review-cancel-btn {
+        border: 1.5px solid #e5e7eb !important;
+        border-radius: 10px !important;
+        color: #6b7280 !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 500 !important;
+        font-size: .88rem !important;
+        background: transparent !important;
+        cursor: pointer !important;
+        transition: border-color .15s, color .15s !important;
+    }
+    .eco-review-cancel-btn:hover { border-color: #9ca3af !important; color: #374151 !important; }
+
+    /* Load more button */
+    .eco-review-load-more-btn {
+        border: 1.5px solid #008138 !important;
+        border-radius: 10px !important;
+        color: #008138 !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: .88rem !important;
+        background: transparent !important;
+        cursor: pointer !important;
+        padding: .6rem 2rem !important;
+        transition: background .15s, color .15s !important;
+    }
+    .eco-review-load-more-btn:hover { background: #008138 !important; color: #fff !important; }
+
+    /* Translate button */
+    .eco-review-translate-btn {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 8px !important;
+        color: #6b7280 !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-size: .78rem !important;
+        background: transparent !important;
+        padding: .3rem .75rem !important;
+        cursor: pointer !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: .35rem !important;
+        transition: border-color .15s, color .15s !important;
+    }
+    .eco-review-translate-btn:hover { border-color: #008138 !important; color: #008138 !important; }
+
+    /* Rating bar */
+    .eco-review-rating-bar-fill {
+        background: #008138 !important;
+    }
+
+    /* Average rating number */
+    .eco-review-avg-number {
+        font-family: 'DM Serif Display', serif !important;
+        color: #012b17 !important;
+        font-size: 3.5rem !important;
+        line-height: 1 !important;
+    }
+
+    /* Customer review heading */
+    .eco-review-section-title {
+        font-family: 'DM Serif Display', serif !important;
+        color: #012b17 !important;
+        font-size: 1.8rem !important;
+        font-weight: 400 !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    /* Review card */
+    .eco-review-card-item {
+        border-color: #e5e7eb !important;
+        border-radius: 14px !important;
+    }
+
+    /* Reviewer name */
+    .eco-review-reviewer-name {
+        font-family: 'Poppins', sans-serif !important;
+        font-size: .95rem !important;
+        font-weight: 600 !important;
+        color: #111827 !important;
+    }
+
+    /* Avatar fallback */
+    .eco-review-avatar-fallback {
+        background: #dcfce7 !important;
+        color: #008138 !important;
+        font-weight: 700 !important;
+        border-radius: 12px !important;
+    }
+
+    /* Desktop tabs identity */
+    [id$="-tab-button"] {
+        font-family: 'Poppins', sans-serif !important;
+        font-size: .9rem !important;
+        font-weight: 500 !important;
+        color: #6b7280 !important;
+        padding-bottom: .75rem !important;
+        transition: color .15s, border-color .15s !important;
+    }
+    [id$="-tab-button"]:hover { color: #008138 !important; }
+    [id$="-tab-button"][aria-selected="true"] {
+        color: #008138 !important;
+        border-bottom-color: #008138 !important;
+        border-bottom-width: 2px !important;
+    }
+</style>
+@endpushOnce
+
 {!! view_render_event('bagisto.shop.products.view.reviews.after', ['product' => $product]) !!}
 
 <v-product-reviews>
@@ -129,7 +279,7 @@
 
                             <div class="mt-4 flex justify-start gap-4 max-xl:mb-5 max-sm:mb-5 max-sm:flex-wrap max-sm:justify-normal max-sm:gap-x-0">
                                 <button
-                                    class="primary-button w-full max-w-[374px] rounded-2xl px-11 py-4 text-center max-md:max-w-full max-md:rounded-lg max-md:py-3 max-sm:py-1.5"
+                                    class="eco-review-submit-btn w-full max-w-[374px] text-center max-md:max-w-full max-md:py-3 max-sm:py-1.5"
                                     type='submit'
                                 >
                                     @lang('shop::app.products.view.reviews.submit-review')
@@ -137,7 +287,7 @@
 
                                 <button
                                     type="button"
-                                    class="secondary-button items-center rounded-2xl px-8 py-2.5 max-md:w-full max-md:max-w-full max-md:rounded-lg max-md:py-1.5"
+                                    class="eco-review-cancel-btn items-center px-8 py-2.5 max-md:w-full max-md:max-w-full max-md:py-1.5"
                                     @click="canReview = false"
                                 >
                                     @lang('shop::app.products.view.reviews.cancel')
@@ -158,9 +308,8 @@
                 <!-- Reviews Cards Container -->
                 <template v-else>
                     <template v-if="reviews.length">
-                        <h3 class="mb-8 font-dmserif text-3xl max-md:mb-2.5 max-md:text-2xl max-sm:text-xl">
+                        <h3 class="eco-review-section-title max-md:mb-2.5 max-md:text-2xl max-sm:text-xl">
                             @lang('shop::app.products.view.reviews.customer-review')
-
                             ({{ $reviewHelper->getTotalReviews($product) }})
                         </h3>
 
@@ -169,7 +318,7 @@
                             <div class="sticky top-24 flex h-max flex-col gap-6 max-lg:relative max-lg:top-auto max-md:w-full">
 
                                 <div class="flex flex-col items-center gap-2 max-md:mt-3 max-md:gap-0 max-md:border-b max-md:border-zinc-200 max-md:pb-3">
-                                    <p class="text-5xl max-md:text-3xl">
+                                    <p class="eco-review-avg-number max-md:text-3xl">
                                         {{ $avgRatings }}
                                     </p>
 
@@ -194,7 +343,7 @@
 
                                             <div class="h-4 w-[275px] max-w-full rounded-sm bg-neutral-200 max-sm:h-3.5 max-sm:w-full">
                                                 <div
-                                                    class="h-4 rounded-sm bg-amber-500 max-sm:h-3.5"
+                                                    class="eco-review-rating-bar-fill h-4 rounded-sm max-sm:h-3.5"
                                                     style="width: {{ $percentageRatings[$i] }}%"
                                                 ></div>
                                             </div>
@@ -209,11 +358,10 @@
                                             || auth()->guard('customer')->user()
                                         )
                                             <div
-                                                class="flex cursor-pointer items-center justify-center gap-x-4 rounded-xl border border-navyBlue px-4 py-3 max-sm:rounded-lg max-sm:py-1.5"
+                                                class="eco-review-write-btn"
                                                 @click="canReview = true"
                                             >
-                                                <span class="icon-pen text-2xl"></span>
-
+                                                <span class="icon-pen text-xl"></span>
                                                 @lang('shop::app.products.view.reviews.write-a-review')
                                             </div>
                                     @endif
@@ -229,7 +377,7 @@
                                 ></v-product-review-item>
 
                                 <button
-                                    class="mx-auto block w-max rounded-2xl border border-navyBlue bg-white px-11 py-3 text-center text-base font-medium text-navyBlue"
+                                    class="eco-review-load-more-btn mx-auto block"
                                     v-if="links?.next"
                                     @click="get()"
                                 >
@@ -259,11 +407,11 @@
                                         || auth()->guard('customer')->user()
                                     )
                                         <div
-                                            class="mt-8 flex cursor-pointer items-center gap-x-4 rounded-xl border border-navyBlue px-4 py-2.5 max-sm:mt-5 max-sm:gap-x-1.5 max-sm:rounded-lg max-sm:py-1.5 max-sm:text-sm"
+                                            class="eco-review-write-btn mt-8 max-sm:mt-5"
+                                            style="max-width: 280px;"
                                             @click="canReview = true"
                                         >
-                                            <span class="icon-pen text-2xl max-sm:text-lg"></span>
-
+                                            <span class="icon-pen text-xl"></span>
                                             @lang('shop::app.products.view.reviews.write-a-review')
                                         </div>
                                 @endif
@@ -280,7 +428,7 @@
         type="text/x-template"
         id="v-product-review-item-template"
     >
-        <div class="rounded-xl border border-zinc-200 p-6 max-md:hidden">
+        <div class="eco-review-card-item rounded-xl border border-zinc-200 p-6 max-md:hidden">
             <div class="flex gap-5">
                 <template v-if="review.profile">
                     <img
@@ -293,17 +441,17 @@
 
                 <template v-else>
                     <div
-                        class="flex max-h-[100px] min-h-[100px] min-w-[100px] max-w-[100px] items-center justify-center rounded-xl bg-zinc-100"
+                        class="eco-review-avatar-fallback flex max-h-[100px] min-h-[100px] min-w-[100px] max-w-[100px] items-center justify-center rounded-xl"
                         :title="review.name"
                     >
-                        <span class="text-2xl font-semibold text-zinc-500">
+                        <span class="text-2xl font-semibold">
                             @{{ review.name.split(' ').map(name => name.charAt(0).toUpperCase()).join('') }}
                         </span>
                     </div>
                 </template>
 
                 <div class="flex flex-col">
-                    <p class="font x-md:text-lg text-xl">
+                    <p class="eco-review-reviewer-name">
                         @{{ review.name }}
                     </p>
 
@@ -332,7 +480,7 @@
 
                 @if ((bool) core()->getConfigData('general.magic_ai.review_translation.enabled'))
                     <button
-                        class="secondary-button min-h-[34px] rounded-lg px-2 py-1 text-sm max-md:rounded-lg"
+                        class="eco-review-translate-btn"
                         @click="translate"
                     >
                         <!-- Spinner -->
@@ -451,7 +599,7 @@
 
                     @if ((bool) core()->getConfigData('general.magic_ai.review_translation.enabled'))
                         <button
-                            class="secondary-button mt-2.5 min-h-[34px] rounded-lg px-4 py-2.5 text-base max-md:rounded-lg max-sm:px-3 max-sm:py-1 max-sm:text-xs"
+                            class="eco-review-translate-btn mt-2.5"
                             @click="translate"
                         >
                             <!-- Spinner -->
