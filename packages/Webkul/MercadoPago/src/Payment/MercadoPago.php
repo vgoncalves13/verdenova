@@ -47,7 +47,16 @@ class MercadoPago extends Payment
         $status = $response['status'] ?? '';
 
         if ($status === 'processed') {
-            session()->forget(['mercadopago.payment_data', 'mercadopago.pending_payment']);
+            $mpOrderId = $response['id'] ?? null;
+            $mpPaymentId = $response['transactions']['payments'][0]['id'] ?? null;
+
+            $additional = $this->buildAdditionalData($formData, $mpOrderId, $mpPaymentId, $cart);
+
+            // Order doesn't exist yet — Bagisto creates it after getRedirectUrl() returns null.
+            // Store data in session; the service provider listener will apply it on checkout.order.save.after.
+            session(['mercadopago.payment_additional' => $additional]);
+
+            session()->forget(['mercadopago.payment_data', 'mercadopago.pending_payment', 'mercadopago.installment_total']);
 
             return null;
         }
@@ -56,12 +65,16 @@ class MercadoPago extends Payment
             $payment = $response['transactions']['payments'][0] ?? [];
             $paymentMethod = $payment['payment_method'] ?? [];
 
+            $mpOrderId = $response['id'] ?? null;
+            $mpPaymentId = $payment['id'] ?? null;
+
             Log::info('[MercadoPago] Pix/Boleto criado', [
-                'mp_order_id' => $response['id'] ?? null,
+                'mp_order_id' => $mpOrderId,
                 'payment_type' => $paymentTypeId,
             ]);
 
-            $order = $this->createBagistoOrder($cart);
+            $additional = $this->buildAdditionalData($formData, $mpOrderId, $mpPaymentId, $cart);
+            $order = $this->createBagistoOrder($cart, $additional);
 
             session([
                 'mercadopago.pending_payment' => [
@@ -100,10 +113,15 @@ class MercadoPago extends Payment
     /**
      * Create the Bagisto order and deactivate the cart.
      */
-    protected function createBagistoOrder(mixed $cart): mixed
+    protected function createBagistoOrder(mixed $cart, array $additional = []): mixed
     {
         try {
             $data = (new OrderResource($cart))->jsonSerialize();
+
+            if (! empty($additional)) {
+                $data['payment']['additional'] = $additional;
+            }
+
             $order = app(OrderRepository::class)->create($data);
 
             Cart::deActivateCart();
@@ -116,6 +134,36 @@ class MercadoPago extends Payment
 
             return null;
         }
+    }
+
+    /**
+     * Build the array to persist in order_payment.additional.
+     */
+    protected function buildAdditionalData(
+        array $formData,
+        ?string $mpOrderId,
+        ?string $mpPaymentId,
+        mixed $cart
+    ): array {
+        $additional = [
+            'mp_order_id' => $mpOrderId,
+            'mp_payment_id' => $mpPaymentId,
+            'payment_method_id' => $formData['payment_method_id'] ?? null,
+        ];
+
+        $installments = (int) ($formData['installments'] ?? 1);
+        $installmentTotal = session('mercadopago.installment_total');
+
+        if ($installments > 1 && $installmentTotal !== null) {
+            $totalPaid = (float) $installmentTotal;
+            $interestAmount = $totalPaid - (float) $cart->grand_total;
+
+            $additional['installments'] = $installments;
+            $additional['total_paid'] = number_format($totalPaid, 2, '.', '');
+            $additional['interest_amount'] = number_format($interestAmount, 2, '.', '');
+        }
+
+        return $additional;
     }
 
     /**
@@ -180,7 +228,7 @@ class MercadoPago extends Payment
                     'street_number' => $streetNumber ?: '0',
                     'neighborhood' => $billing->city ?? '',
                     'city' => $billing->city ?? '',
-                    'state'        => $billing->state ?? '',
+                    'state' => $billing->state ?? '',
                 ];
             }
 
@@ -198,19 +246,70 @@ class MercadoPago extends Payment
         }
 
         // Credit / debit card
+        $installments = (int) ($formData['installments'] ?? 1);
+
+        $chargeAmount = $installments > 1
+            ? ($this->fetchInstallmentTotal($paymentMethodId, $totalAmount, $installments) ?? $totalAmount)
+            : $totalAmount;
+
+        if ($chargeAmount !== $totalAmount) {
+            $base['total_amount'] = $chargeAmount;
+            session(['mercadopago.installment_total' => $chargeAmount]);
+
+            Log::info('[MercadoPago] Installment total with fee', [
+                'installments' => $installments,
+                'original' => $totalAmount,
+                'with_fee' => $chargeAmount,
+            ]);
+        }
+
         $paymentMethod = [
             'id' => $paymentMethodId,
             'type' => $paymentTypeId,
             'token' => $formData['token'] ?? '',
-            'installments' => (int) ($formData['installments'] ?? 1),
+            'installments' => $installments,
         ];
 
         $base['transactions']['payments'][] = [
-            'amount' => $totalAmount,
+            'amount' => $chargeAmount,
             'payment_method' => $paymentMethod,
         ];
 
         return $base;
+    }
+
+    /**
+     * Query the MP installments API and return the total amount with fees
+     * for the given payment method and installment count.
+     * Returns null if unavailable or installments == 1.
+     */
+    protected function fetchInstallmentTotal(string $paymentMethodId, string $amount, int $installments): ?string
+    {
+        try {
+            $client = new Client(['base_uri' => $this->getApiUrl()]);
+
+            $response = $client->get('/v1/payment_methods/installments', [
+                'headers' => ['Authorization' => 'Bearer '.$this->getConfigData('access_token')],
+                'query' => [
+                    'payment_method_id' => $paymentMethodId,
+                    'amount' => $amount,
+                    'locale' => 'pt-BR',
+                ],
+                'http_errors' => false,
+            ]);
+
+            $data = json_decode((string) $response->getBody(), true);
+
+            foreach ($data[0]['payer_costs'] ?? [] as $cost) {
+                if ((int) $cost['installments'] === $installments) {
+                    return number_format((float) $cost['total_amount'], 2, '.', '');
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('[MercadoPago] Failed to fetch installment total', ['error' => $e->getMessage()]);
+        }
+
+        return null;
     }
 
     /**

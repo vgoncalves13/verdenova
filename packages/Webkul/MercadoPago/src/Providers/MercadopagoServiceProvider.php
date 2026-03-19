@@ -2,9 +2,11 @@
 
 namespace Webkul\MercadoPago\Providers;
 
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Webkul\MercadoPago\Console\Commands\ApproveMercadoPagoPayment;
 use Webkul\MercadoPago\Console\Commands\TestMercadoPagoPix;
+use Webkul\Theme\ViewRenderEventManager;
 
 class MercadopagoServiceProvider extends ServiceProvider
 {
@@ -35,5 +37,68 @@ class MercadopagoServiceProvider extends ServiceProvider
                 TestMercadoPagoPix::class,
             ]);
         }
+
+        Event::listen(
+            'checkout.order.save.after',
+            function ($order): void {
+                $additional = session('mercadopago.payment_additional');
+
+                if (empty($additional)) {
+                    return;
+                }
+
+                if (! str_starts_with($order->payment->method ?? '', 'mercadopago')) {
+                    return;
+                }
+
+                $order->payment->update(['additional' => $additional]);
+
+                session()->forget('mercadopago.payment_additional');
+            }
+        );
+
+        Event::listen(
+            'bagisto.shop.customers.account.orders.view.payment_method_details.after',
+            function (ViewRenderEventManager $viewRenderEventManager): void {
+                $order = $viewRenderEventManager->getParam('order');
+
+                if (! $order?->payment || ! str_starts_with($order->payment->method ?? '', 'mercadopago')) {
+                    return;
+                }
+
+                $additional = $order->payment->additional;
+
+                if (empty($additional)) {
+                    return;
+                }
+
+                $viewRenderEventManager->addTemplate(
+                    'mercadopago::shop.order-payment-details',
+                    ['additional' => $additional]
+                );
+            }
+        );
+
+        Event::listen(
+            'bagisto.admin.sales.order.payment-method.after',
+            function (ViewRenderEventManager $viewRenderEventManager): void {
+                $order = $viewRenderEventManager->getParam('order');
+
+                if (! $order?->payment || ! str_starts_with($order->payment->method ?? '', 'mercadopago')) {
+                    return;
+                }
+
+                $additional = $order->payment->additional;
+
+                if (empty($additional)) {
+                    return;
+                }
+
+                $viewRenderEventManager->addTemplate(
+                    'mercadopago::admin.order-payment-details',
+                    ['additional' => $additional]
+                );
+            }
+        );
     }
 }

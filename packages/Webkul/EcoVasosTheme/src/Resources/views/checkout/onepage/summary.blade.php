@@ -189,13 +189,20 @@
     <!-- Cart Grand Total -->
     {!! view_render_event('bagisto.shop.checkout.onepage.summary.grand_total.before') !!}
 
+    <!-- Installment fee line (only shown when parcelamento com juros is selected) -->
+    <div v-if="installmentTotal" class="flex justify-between text-right text-sm text-zinc-500">
+        <p>Juros do parcelamento</p>
+        <p>+ @{{ formatBRL(installmentTotal - cart.grand_total) }}</p>
+    </div>
+
     <div class="flex justify-between text-right">
         <p class="text-lg font-semibold max-sm:text-sm">
             @lang('shop::app.checkout.onepage.summary.grand-total')
         </p>
 
         <p class="text-lg font-semibold max-sm:text-sm">
-            @{{ cart.formatted_grand_total }}
+            <span v-if="installmentTotal">@{{ formatBRL(installmentTotal) }}</span>
+            <span v-else>@{{ cart.formatted_grand_total }}</span>
         </p>
     </div>
 

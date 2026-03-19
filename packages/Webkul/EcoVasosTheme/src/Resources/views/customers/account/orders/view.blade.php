@@ -402,15 +402,6 @@
 
                                         {!! view_render_event('bagisto.shop.customers.account.orders.view.information.tax-amount.before') !!}
 
-                                        <!-- Tax Amount -->
-                                        <div class="flex w-full justify-between gap-x-5">
-                                            @lang('shop::app.customers.account.orders.view.information.tax')
-
-                                            <p>
-                                                {{ core()->formatPrice($order->tax_amount, $order->order_currency_code) }}
-                                            </p>
-                                        </div>
-
                                         {!! view_render_event('bagisto.shop.customers.account.orders.view.information.tax-amount.after') !!}
 
                                         {!! view_render_event('bagisto.shop.customers.account.orders.view.information.discount.before') !!}
@@ -444,6 +435,23 @@
                                                 {{ core()->formatPrice($order->grand_total, $order->order_currency_code) }}
                                             </p>
                                         </div>
+
+                                        @php
+                                            $mpAdditional = $order->payment->additional ?? [];
+                                            $mpInterest = isset($mpAdditional['interest_amount']) ? (float) $mpAdditional['interest_amount'] : 0;
+                                        @endphp
+
+                                        @if($mpInterest > 0)
+                                            <div class="flex w-full justify-between gap-x-5">
+                                                <p>Juros ({{ $mpAdditional['installments'] }}x no cartão)</p>
+                                                <p>+ R$ {{ number_format($mpInterest, 2, ',', '.') }}</p>
+                                            </div>
+
+                                            <div class="flex w-full justify-between gap-x-5 font-semibold">
+                                                <p>Total cobrado</p>
+                                                <p>R$ {{ number_format((float) $mpAdditional['total_paid'], 2, ',', '.') }}</p>
+                                            </div>
+                                        @endif
 
                                         {!! view_render_event('bagisto.shop.customers.account.orders.view.information.grand-total.after') !!}
 

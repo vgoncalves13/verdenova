@@ -632,6 +632,29 @@
                                     <b>{!! core()->formatPrice($invoice->grand_total, $orderCurrencyCode) !!}</b>
                                 </td>
                             </tr>
+
+                            @php
+                                $mpAdditional = $invoice->order->payment->additional ?? [];
+                                $mpInterest = isset($mpAdditional['interest_amount']) ? (float) $mpAdditional['interest_amount'] : 0;
+                            @endphp
+
+                            @if($mpInterest > 0)
+                                <tr>
+                                    <td>Juros ({{ $mpAdditional['installments'] }}x no cartão)</td>
+                                    <td>-</td>
+                                    <td>+ R$ {{ number_format($mpInterest, 2, ',', '.') }}</td>
+                                </tr>
+
+                                <tr>
+                                    <td style="border-top: 1px solid #FFFFFF;">
+                                        <b>Total cobrado</b>
+                                    </td>
+                                    <td style="border-top: 1px solid #FFFFFF;">-</td>
+                                    <td style="border-top: 1px solid #FFFFFF;">
+                                        <b>R$ {{ number_format((float) $mpAdditional['total_paid'], 2, ',', '.') }}</b>
+                                    </td>
+                                </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>

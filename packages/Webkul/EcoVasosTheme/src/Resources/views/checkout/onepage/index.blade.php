@@ -170,6 +170,8 @@
                         paymentMethods: null,
 
                         canPlaceOrder: false,
+
+                        installmentTotal: null,
                     }
                 },
 
@@ -214,6 +216,14 @@
                         }
 
                         this.getCart();
+                    },
+
+                    setInstallmentTotal(total) {
+                        this.installmentTotal = total;
+                    },
+
+                    formatBRL(amount) {
+                        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(amount);
                     },
 
                     scrollToCurrentStep() {

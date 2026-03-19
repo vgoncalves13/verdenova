@@ -5,6 +5,7 @@
     :cart-total="cart.grand_total"
     @processing="stepForward"
     @processed="stepProcessed"
+    @installment-total="setInstallmentTotal"
 >
     <x-shop::shimmer.checkout.onepage.payment-method />
 </v-payment-methods>
@@ -202,7 +203,7 @@
                 },
             },
 
-            emits: ['processing', 'processed'],
+            emits: ['processing', 'processed', 'installment-total'],
 
             data() {
                 return {
@@ -212,6 +213,7 @@
                     mpAmount: {{ (float) (optional(\Webkul\Checkout\Facades\Cart::getCart())->grand_total ?? 0) }},
 
                     mpBrickController: null,
+                    mpInstallmentOptions: [],
                     mpSubmitting: false,
                     mpCardError: null,
                     mpCardRetry: false,
@@ -293,6 +295,7 @@
                     }
 
                     const mp = new window.MercadoPago(this.mpPublicKey, { locale: 'pt-BR' });
+                    this._mpInstance = mp;
                     const bricks = mp.bricks();
 
                     this.mpBrickController = await bricks.create('cardPayment', 'mp-card-brick', {
@@ -310,7 +313,33 @@
                             },
                         },
                         callbacks: {
-                            onReady: () => {},
+                            onReady: () => {
+                                // Listen for installment dropdown changes inside the Brick
+                                const container = document.getElementById('mp-card-brick');
+                                if (container) {
+                                    container.addEventListener('change', (e) => {
+                                        if (e.target.tagName !== 'SELECT') return;
+                                        const val = parseInt(e.target.value, 10);
+                                        if (!val) return;
+                                        const opt = this.mpInstallmentOptions.find(o => o.installments === val);
+                                        if (opt) {
+                                            this.$emit('installment-total', opt.total_amount);
+                                        }
+                                    });
+                                }
+                            },
+                            onBinChange: async (bin) => {
+                                if (!bin || !this._mpInstance) return;
+                                try {
+                                    const amount = String(this.cartTotal ?? this.mpAmount);
+                                    const results = await this._mpInstance.getInstallments({ amount, bin, locale: 'pt-BR' });
+                                    this.mpInstallmentOptions = results?.[0]?.payer_costs ?? [];
+                                    // Reset to cart total when card changes
+                                    this.$emit('installment-total', null);
+                                } catch (e) {
+                                    console.warn('[MercadoPago] getInstallments error:', e);
+                                }
+                            },
                             onError: (error) => {
                                 console.error('[MercadoPago Brick]', error);
                                 this.mpCardError = 'Erro ao carregar o formulário de cartão.';
@@ -338,6 +367,9 @@
                         try { this.mpBrickController.unmount(); } catch (_) {}
                         this.mpBrickController = null;
                     }
+                    this.mpInstallmentOptions = [];
+                    this._mpInstance = null;
+                    this.$emit('installment-total', null);
                 },
 
                 async submitPix() {
