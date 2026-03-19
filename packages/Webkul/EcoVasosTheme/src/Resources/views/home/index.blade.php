@@ -631,7 +631,7 @@ html, body { overflow-x: hidden; }
             <div class="vn-hero__grid">
 
                 <div>
-                    <span class="vn-badge">🌿 Produtos Ecológicos &amp; Sustentáveis</span>
+                    <span class="vn-badge">🌿 Produto único no planeta, 100% ecológico e patenteado</span>
 
                     <h1 class="vn-hero__title">
                         Natureza<br>
@@ -640,8 +640,12 @@ html, body { overflow-x: hidden; }
                     </h1>
 
                     <p class="vn-hero__subtitle">
-                        Vasos artesanais, plantas selecionadas e produtos
-                        ecológicos que transformam seu espaço e respeitam o planeta.
+                        Produtos feitos 100% de fibra de coco, livre de toxinas. Possui alta porosidade, permitindo que
+                        a planta respire de forma eficiente. É seguro para usos sensíveis, como aquarismo, cultivo de
+                        alimentos e ambientes com animais.<br><br>
+
+                        Além disso, oferece durabilidade superior, com vida útil estendida em comparação aos produtos
+                        convencionais, sendo resistente a intempéries e ao uso intenso.
                     </p>
 
                     <div class="vn-hero__actions">
@@ -653,15 +657,15 @@ html, body { overflow-x: hidden; }
 
                     <div class="vn-hero__stats">
                         <div>
-                            <span class="vn-stat__num">500+</span>
-                            <span class="vn-stat__lbl">Produtos</span>
+                            <span class="vn-stat__num">Tecnologia Patenteada</span>
+                            <span class="vn-stat__lbl">PI0200037-7</span>
                         </div>
                         <div>
-                            <span class="vn-stat__num">100%</span>
-                            <span class="vn-stat__lbl">Sustentável</span>
+                            <span class="vn-stat__num">Resistente à Água</span>
+                            <span class="vn-stat__lbl">Suporta imersão prolongada e ambientes úmidos.</span>
                         </div>
                         <div>
-                            <span class="vn-stat__num">4.9 ★</span>
+                            <span class="vn-stat__num">4.9★</span>
                             <span class="vn-stat__lbl">Avaliação</span>
                         </div>
                     </div>
@@ -758,14 +762,11 @@ html, body { overflow-x: hidden; }
     <div class="vn-marquee" aria-hidden="true">
         <div class="vn-marquee__track">
             @for ($i = 0; $i < 2; $i++)
-                <span class="vn-marquee__item">🌿 Verde Nova <span class="vn-marquee__dot"></span></span>
-                <span class="vn-marquee__item">Sustentabilidade <span class="vn-marquee__dot"></span></span>
-                <span class="vn-marquee__item">🪴 Vasos Artesanais <span class="vn-marquee__dot"></span></span>
-                <span class="vn-marquee__item">Plantas Selecionadas <span class="vn-marquee__dot"></span></span>
-                <span class="vn-marquee__item">♻️ Eco Friendly <span class="vn-marquee__dot"></span></span>
-                <span class="vn-marquee__item">Feito com Amor <span class="vn-marquee__dot"></span></span>
-                <span class="vn-marquee__item">🌱 100% Natural <span class="vn-marquee__dot"></span></span>
-                <span class="vn-marquee__item">Certificado Orgânico <span class="vn-marquee__dot"></span></span>
+                <span class="vn-marquee__item">Alta porosidade estrutural <span class="vn-marquee__dot"></span></span>
+                <span class="vn-marquee__item">Excelente drenagem natural <span class="vn-marquee__dot"></span></span>
+                <span class="vn-marquee__item">Estabilidade química <span class="vn-marquee__dot"></span></span>
+                <span class="vn-marquee__item">Material vegetal e biodegradável <span class="vn-marquee__dot"></span></span>
+                <span class="vn-marquee__item">Tecnologia patenteada <span class="vn-marquee__dot"></span></span>
             @endfor
         </div>
     </div>
